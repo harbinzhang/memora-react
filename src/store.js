@@ -22,6 +22,15 @@ export const useStore = create((set, get) => ({
     cards: [],
     loading: false,
     error: null,
+    theme: localStorage.getItem('memora_theme') || 'dark',
+
+    toggleTheme: () => {
+        set(state => {
+            const newTheme = state.theme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('memora_theme', newTheme);
+            return { theme: newTheme };
+        });
+    },
 
     // Initialize listeners or load from local storage
     initialize: () => {
