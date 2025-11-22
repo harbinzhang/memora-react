@@ -12,9 +12,9 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 
-// Check if Firebase is configured (simple check)
+// Check if Firebase is configured
 const isFirebaseConfigured = () => {
-    return db.app.options.apiKey !== "YOUR_API_KEY";
+    return !!db.app.options.apiKey;
 };
 
 export const useStore = create((set, get) => ({
