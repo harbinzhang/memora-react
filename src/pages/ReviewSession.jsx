@@ -37,64 +37,52 @@ export default function ReviewSession() {
 
     if (isFinished) {
         return (
-            <div className="animate-fade-in" style={{ textAlign: 'center', marginTop: '4rem' }}>
-                <CheckCircle size={64} color="var(--success)" style={{ marginBottom: '1rem' }} />
-                <h1>Session Complete!</h1>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>You have reviewed all cards in this deck.</p>
+            <div className="animate-fade-in text-center mt-16 max-w-md mx-auto">
+                <div className="flex justify-center mb-6">
+                    <CheckCircle size={64} className="text-success" />
+                </div>
+                <h1 className="mb-4">Session Complete!</h1>
+                <p className="text-secondary mb-8">You have reviewed all cards in this deck.</p>
                 <Link to="/" className="btn btn-primary">Back to Dashboard</Link>
             </div>
         );
     }
 
     return (
-        <div className="animate-fade-in" style={{ maxWidth: '600px', margin: '0 auto' }}>
-            <header style={{ display: 'flex', alignItems: 'center', marginBottom: '2rem' }}>
-                <Link to={`/deck/${deckId}`} style={{ color: 'var(--text-secondary)', marginRight: '1rem' }}>
+        <div className="animate-fade-in max-w-2xl mx-auto">
+            <header className="flex items-center mb-8">
+                <Link to={`/deck/${deckId}`} className="text-secondary hover:text-primary mr-4 transition-colors">
                     <ArrowLeft size={20} />
                 </Link>
-                <div style={{ flex: 1 }}>
-                    <h2 style={{ margin: 0, fontSize: '1.2rem' }}>Review: {deck.name}</h2>
-                    <div style={{ height: '4px', background: 'var(--bg-card)', marginTop: '0.5rem', borderRadius: '2px' }}>
+                <div className="flex-1">
+                    <div className="flex justify-between items-end mb-2">
+                        <h2 className="text-lg m-0 font-medium">Review: {deck.name}</h2>
+                        <span className="text-sm text-secondary">
+                            {currentIndex + 1} / {reviewCards.length}
+                        </span>
+                    </div>
+                    <div className="h-1 bg-card rounded-full overflow-hidden">
                         <div
-                            style={{
-                                height: '100%',
-                                background: 'var(--accent)',
-                                width: `${((currentIndex) / reviewCards.length) * 100}%`,
-                                borderRadius: '2px',
-                                transition: 'width 0.3s'
-                            }}
+                            className="h-full bg-accent transition-all duration-300 ease-out"
+                            style={{ width: `${((currentIndex) / reviewCards.length) * 100}%` }}
                         />
                     </div>
                 </div>
-                <span style={{ marginLeft: '1rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                    {currentIndex + 1} / {reviewCards.length}
-                </span>
             </header>
 
             <div
-                className="card"
-                style={{
-                    minHeight: '300px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                    perspective: '1000px'
-                }}
+                className="card min-h-[300px] flex flex-col justify-center items-center cursor-pointer relative perspective-1000 group hover:border-accent/50 transition-colors"
                 onClick={() => !isFlipped && setIsFlipped(true)}
             >
-                <div style={{ textAlign: 'center' }}>
-                    <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>{currentCard.front}</h3>
+                <div className="text-center w-full p-8">
+                    <h3 className="text-2xl mb-4 font-medium">{currentCard.front}</h3>
 
-                    {isFlipped && (
-                        <div className="animate-fade-in" style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '1rem', marginTop: '1rem' }}>
-                            <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)' }}>{currentCard.back}</p>
+                    {isFlipped ? (
+                        <div className="animate-fade-in border-t border-glass-border pt-6 mt-6">
+                            <p className="text-xl text-secondary">{currentCard.back}</p>
                         </div>
-                    )}
-
-                    {!isFlipped && (
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '2rem' }}>
+                    ) : (
+                        <p className="text-sm text-secondary mt-8 opacity-50 group-hover:opacity-100 transition-opacity">
                             Click to show answer
                         </p>
                     )}
@@ -102,14 +90,23 @@ export default function ReviewSession() {
             </div>
 
             {isFlipped && (
-                <div className="animate-fade-in" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginTop: '2rem' }}>
-                    <button className="btn" style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }} onClick={handleNext}>
+                <div className="animate-fade-in grid grid-cols-3 gap-4 mt-8">
+                    <button
+                        className="btn border-danger text-danger hover:bg-danger hover:text-white"
+                        onClick={handleNext}
+                    >
                         Again
                     </button>
-                    <button className="btn" style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }} onClick={handleNext}>
+                    <button
+                        className="btn border-accent text-accent hover:bg-accent hover:text-white"
+                        onClick={handleNext}
+                    >
                         Good
                     </button>
-                    <button className="btn" style={{ borderColor: 'var(--success)', color: 'var(--success)' }} onClick={handleNext}>
+                    <button
+                        className="btn border-success text-success hover:bg-success hover:text-white"
+                        onClick={handleNext}
+                    >
                         Easy
                     </button>
                 </div>

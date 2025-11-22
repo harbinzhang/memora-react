@@ -63,13 +63,13 @@ export default function DeckView() {
 
     return (
         <div className="animate-fade-in">
-            <header style={{ display: 'flex', alignItems: 'center', marginBottom: '2rem', gap: '1rem' }}>
-                <Link to="/" style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}>
+            <header className="flex items-center mb-8 gap-4">
+                <Link to="/" className="text-secondary hover:text-primary transition-colors flex items-center">
                     <ArrowLeft size={20} />
                 </Link>
-                <div style={{ flex: 1 }}>
-                    <h1 style={{ margin: 0 }}>{deck.name}</h1>
-                    <p style={{ color: 'var(--text-secondary)', margin: 0 }}>{deckCards.length} cards</p>
+                <div className="flex-1">
+                    <h1 className="mb-1">{deck.name}</h1>
+                    <p className="m-0">{deckCards.length} cards</p>
                 </div>
                 <Link to={`/review/${deckId}`} className="btn btn-primary">
                     Study Now
@@ -77,23 +77,22 @@ export default function DeckView() {
             </header>
 
             {/* Add Card Form */}
-            <div className="card" style={{ border: isAdding ? '1px solid var(--accent)' : undefined }}>
+            <div className={`card mb-8 ${isAdding ? 'border-accent' : ''}`}>
                 {!isAdding ? (
                     <button
-                        className="btn"
-                        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                        className="btn w-full flex items-center justify-center gap-2"
                         onClick={() => { setIsAdding(true); setEditingId(null); setFront(''); setBack(''); setTags(''); }}
                     >
                         <Plus size={18} /> Add New Card
                     </button>
                 ) : (
                     <form onSubmit={handleAddCard}>
-                        <h3 style={{ marginTop: 0 }}>New Card</h3>
-                        <div style={{ display: 'grid', gap: '1rem' }}>
+                        <h3 className="mt-0">New Card</h3>
+                        <div className="flex flex-col gap-4">
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Front</label>
+                                <label className="label">Front</label>
                                 <textarea
-                                    className="input"
+                                    className="textarea"
                                     rows="2"
                                     value={front}
                                     onChange={e => setFront(e.target.value)}
@@ -101,16 +100,16 @@ export default function DeckView() {
                                 />
                             </div>
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Back</label>
+                                <label className="label">Back</label>
                                 <textarea
-                                    className="input"
+                                    className="textarea"
                                     rows="3"
                                     value={back}
                                     onChange={e => setBack(e.target.value)}
                                 />
                             </div>
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Tags (comma separated)</label>
+                                <label className="label">Tags (comma separated)</label>
                                 <input
                                     type="text"
                                     className="input"
@@ -119,8 +118,8 @@ export default function DeckView() {
                                     placeholder="vocab, noun, unit1"
                                 />
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                                <button type="button" className="btn" onClick={() => setIsAdding(false)}>Cancel</button>
+                            <div className="flex justify-end gap-4">
+                                <button type="button" className="btn btn-secondary" onClick={() => setIsAdding(false)}>Cancel</button>
                                 <button type="submit" className="btn btn-primary">Add Card</button>
                             </div>
                         </div>
@@ -129,39 +128,39 @@ export default function DeckView() {
             </div>
 
             {/* Card List */}
-            <div style={{ display: 'grid', gap: '1rem' }}>
+            <div className="flex flex-col gap-4">
                 {deckCards.map(card => (
-                    <div key={card.id} className="card" style={{ padding: '1.5rem', marginBottom: 0 }}>
+                    <div key={card.id} className="card p-6 mb-0">
                         {editingId === card.id ? (
                             <form onSubmit={handleUpdateCard}>
-                                <div style={{ display: 'grid', gap: '1rem' }}>
-                                    <textarea className="input" rows="2" value={front} onChange={e => setFront(e.target.value)} />
-                                    <textarea className="input" rows="3" value={back} onChange={e => setBack(e.target.value)} />
+                                <div className="flex flex-col gap-4">
+                                    <textarea className="textarea" rows="2" value={front} onChange={e => setFront(e.target.value)} />
+                                    <textarea className="textarea" rows="3" value={back} onChange={e => setBack(e.target.value)} />
                                     <input className="input" value={tags} onChange={e => setTags(e.target.value)} />
-                                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                                        <button type="button" className="btn" onClick={() => setEditingId(null)}>Cancel</button>
+                                    <div className="flex justify-end gap-4">
+                                        <button type="button" className="btn btn-secondary" onClick={() => setEditingId(null)}>Cancel</button>
                                         <button type="submit" className="btn btn-primary"><Save size={16} /> Save</button>
                                     </div>
                                 </div>
                             </form>
                         ) : (
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontWeight: 500, marginBottom: '0.5rem' }}>{card.front}</div>
-                                    <div style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap' }}>{card.back}</div>
+                            <div className="flex gap-4">
+                                <div className="flex-1">
+                                    <div className="font-medium mb-2">{card.front}</div>
+                                    <div className="text-secondary whitespace-pre-wrap">{card.back}</div>
                                     {card.tags && card.tags.length > 0 && (
-                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                        <div className="flex gap-2 mt-3">
                                             {card.tags.map(tag => (
                                                 <span key={tag} className="badge">{tag}</span>
                                             ))}
                                         </div>
                                     )}
                                 </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                    <button className="btn" style={{ padding: '0.4rem' }} onClick={() => startEdit(card)}>
+                                <div className="flex flex-col gap-2">
+                                    <button className="btn p-2" onClick={() => startEdit(card)} title="Edit">
                                         <Edit2 size={16} />
                                     </button>
-                                    <button className="btn btn-danger" style={{ padding: '0.4rem' }} onClick={() => deleteCard(card.id)}>
+                                    <button className="btn btn-danger p-2" onClick={() => deleteCard(card.id)} title="Delete">
                                         <Trash2 size={16} />
                                     </button>
                                 </div>
