@@ -10,7 +10,8 @@ import {
     query,
     orderBy
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { db, auth } from './firebase';
 
 // Check if Firebase is configured
 const isFirebaseConfigured = () => {
@@ -23,6 +24,8 @@ export const useStore = create((set, get) => ({
     loading: false,
     error: null,
     theme: localStorage.getItem('memora_theme') || 'dark',
+    user: null,
+    loadingAuth: true,
 
     toggleTheme: () => {
         set(state => {
@@ -32,8 +35,26 @@ export const useStore = create((set, get) => ({
         });
     },
 
+    setUser: (user) => {
+        set({ user, loadingAuth: false });
+    },
+
+    logout: async () => {
+        try {
+            await signOut(auth);
+            set({ user: null });
+        } catch (error) {
+            console.error('Logout error:', error);
+            set({ error: error.message });
+        }
+    },
+
     // Initialize listeners or load from local storage
     initialize: () => {
+        // Auth listener
+        const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+            set({ user: user || null, loadingAuth: false });
+        });
         if (isFirebaseConfigured()) {
             // Firebase Realtime Listeners
             const decksQuery = query(collection(db, 'decks'), orderBy('createdAt', 'desc'));
@@ -52,6 +73,7 @@ export const useStore = create((set, get) => ({
             });
 
             return () => {
+                unsubscribeAuth();
                 unsubscribeDecks();
                 unsubscribeCards();
             };
@@ -59,8 +81,8 @@ export const useStore = create((set, get) => ({
             // Local Storage Fallback
             const localDecks = JSON.parse(localStorage.getItem('memora_decks') || '[]');
             const localCards = JSON.parse(localStorage.getItem('memora_cards') || '[]');
-            set({ decks: localDecks, cards: localCards });
-            return () => { };
+            set({ decks: localDecks, cards: localCards, loadingAuth: false });
+            return () => { unsubscribeAuth(); };
         }
     },
 
