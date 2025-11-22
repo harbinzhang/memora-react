@@ -42,7 +42,7 @@ function App() {
           <Link to="/" className="logo">Memora</Link>
           <div className="flex items-center gap-4">
             <button
-              className="btn p-2 rounded-full border-glass-border hover:bg-bg-secondary"
+              className="btn p-2 rounded-full border-glass-border hover:bg-card-hover"
               onClick={toggleTheme}
               title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             >

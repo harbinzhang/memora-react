@@ -50,9 +50,9 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="flex-1 flex items-center justify-center p-4">
             <div className="card max-w-md w-full">
-                <div className="text-center mb-8">
+                <div className="text-center mb-4">
                     <h1 className="text-3xl font-bold bg-gradient mb-2">Memora</h1>
                     <p className="text-secondary">
                         {isSignUp ? 'Create your account' : 'Sign in to your account'}
@@ -131,7 +131,7 @@ export default function Login() {
                         <div className="w-full border-t border-glass-border"></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                        <span className="px-2 bg-bg-card text-secondary">Or continue with</span>
+                        <span className="px-2 bg-card text-secondary">Or continue with</span>
                     </div>
                 </div>
 

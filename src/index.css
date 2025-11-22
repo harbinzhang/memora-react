@@ -308,8 +308,19 @@ a:hover {
   display: flex;
 }
 
+.inline {
+  display: inline;
+}
+
 .items-center {
   align-items: center;
+}
+
+.inset-0 {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 
 .justify-between {
@@ -362,8 +373,35 @@ a:hover {
   height: 0.25rem;
 }
 
+.w-5 {
+  width: 1.25rem;
+}
+
+.h-5 {
+  height: 1.25rem;
+}
+
+.bg-gradient {
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .min-h-\[300px\] {
   min-height: 300px;
+}
+
+.min-h-screen {
+  min-height: 100vh;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.p-4 {
+  padding: 1rem;
 }
 
 .max-w-2xl {
@@ -397,6 +435,15 @@ a:hover {
 
 .p-2 {
   padding: 0.5rem;
+}
+
+.p-3 {
+  padding: 0.75rem;
+}
+
+.px-2 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
 
 .p-6 {
@@ -488,8 +535,17 @@ a:hover {
   line-height: 2rem;
 }
 
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
 .font-medium {
   font-weight: 500;
+}
+
+.font-bold {
+  font-weight: 700;
 }
 
 .whitespace-pre-wrap {
@@ -528,6 +584,10 @@ a:hover {
   background-color: var(--accent);
 }
 
+.hover\:bg-card-hover:hover {
+  background-color: var(--bg-card-hover);
+}
+
 .hover\:bg-danger:hover {
   background-color: var(--danger);
 }
@@ -562,6 +622,10 @@ a:hover {
 
 .hover\:border-accent\/50:hover {
   border-color: hsla(var(--accent-hue), 91%, 60%, 0.5);
+}
+
+.rounded-md {
+  border-radius: var(--radius-md);
 }
 
 .rounded-full {
