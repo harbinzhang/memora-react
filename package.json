@@ -7,7 +7,12 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npm run build && firebase deploy",
+    "deploy:hosting": "npm run build && firebase deploy --only hosting",
+    "deploy:rules": "firebase deploy --only firestore:rules,firestore:indexes,storage",
+    "deploy:functions": "firebase deploy --only functions",
+    "deploy:preview": "npm run build && firebase hosting:channel:deploy preview"
   },
   "dependencies": {
     "firebase": "^12.6.0",

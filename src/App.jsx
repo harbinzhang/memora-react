@@ -1,11 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { useStore } from './store';
 import { Sun, Moon, LogOut, User } from 'lucide-react';
-import Dashboard from './pages/Dashboard';
-import DeckView from './pages/DeckView';
-import ReviewSession from './pages/ReviewSession';
-import Login from './pages/Login';
+
+// Lazy load route components for code splitting
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const DeckView = lazy(() => import('./pages/DeckView'));
+const ReviewSession = lazy(() => import('./pages/ReviewSession'));
+const Login = lazy(() => import('./pages/Login'));
 
 // Protected Route wrapper
 function ProtectedRoute({ children }) {
@@ -66,12 +68,18 @@ function App() {
           </div>
         </nav>
 
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/deck/:deckId" element={<ProtectedRoute><DeckView /></ProtectedRoute>} />
-          <Route path="/review/:deckId" element={<ProtectedRoute><ReviewSession /></ProtectedRoute>} />
-        </Routes>
+        <Suspense fallback={
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="text-secondary">Loading...</div>
+          </div>
+        }>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/deck/:deckId" element={<ProtectedRoute><DeckView /></ProtectedRoute>} />
+            <Route path="/review/:deckId" element={<ProtectedRoute><ReviewSession /></ProtectedRoute>} />
+          </Routes>
+        </Suspense>
       </div>
     </Router>
   );

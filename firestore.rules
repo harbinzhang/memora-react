@@ -1,18 +1,88 @@
-rules_version='2'
+rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Helper function to validate deck data structure
+    function isValidDeck() {
+      return request.resource.data.keys().hasAll(['name', 'createdAt', 'cardCount'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 100
+        && request.resource.data.cardCount is int
+        && request.resource.data.cardCount >= 0;
+    }
+
+    // Helper function to validate card data structure
+    function isValidCard() {
+      return request.resource.data.keys().hasAll(['deckId', 'front', 'back', 'createdAt', 'nextReview', 'interval', 'easeFactor', 'repetitions'])
+        && request.resource.data.front is string
+        && request.resource.data.back is string
+        && request.resource.data.front.size() > 0
+        && request.resource.data.front.size() <= 1000
+        && request.resource.data.back.size() > 0
+        && request.resource.data.back.size() <= 1000
+        && request.resource.data.interval is number
+        && request.resource.data.interval >= 0
+        && request.resource.data.easeFactor is number
+        && request.resource.data.easeFactor > 0
+        && request.resource.data.repetitions is int
+        && request.resource.data.repetitions >= 0;
+    }
+
+    // Decks collection - users can only access their own decks
+    match /decks/{deckId} {
+      // Allow read if authenticated and deck belongs to user
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+      // Allow create if authenticated and setting userId to current user
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid
+        && isValidDeck();
+
+      // Allow update if authenticated and owns the deck
+      allow update: if isAuthenticated()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+        && isValidDeck();
+
+      // Allow delete if authenticated and owns the deck
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // Cards collection - users can only access cards in their own decks
+    match /cards/{cardId} {
+      // Allow read if authenticated and card belongs to user
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+      // Allow create if authenticated and setting userId to current user
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid
+        && isValidCard();
+
+      // Allow update if authenticated and owns the card
+      allow update: if isAuthenticated()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+        && isValidCard();
+
+      // Allow delete if authenticated and owns the card
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // Deny all other access
     match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.time < timestamp.date(2025, 12, 22);
+      allow read, write: if false;
     }
   }
 }

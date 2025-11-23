@@ -8,6 +8,7 @@ import {
     doc,
     onSnapshot,
     query,
+    where,
     orderBy
 } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -51,44 +52,63 @@ export const useStore = create((set, get) => ({
 
     // Initialize listeners or load from local storage
     initialize: () => {
+        let unsubscribeDecks = () => {};
+        let unsubscribeCards = () => {};
+
         // Auth listener
         const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
             set({ user: user || null, loadingAuth: false });
+
+            // Clean up previous listeners
+            unsubscribeDecks();
+            unsubscribeCards();
+
+            if (user && isFirebaseConfigured()) {
+                // Firebase Realtime Listeners with user filtering
+                const decksQuery = query(
+                    collection(db, 'decks'),
+                    where('userId', '==', user.uid),
+                    orderBy('createdAt', 'desc')
+                );
+                unsubscribeDecks = onSnapshot(decksQuery, (snapshot) => {
+                    const decks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    set({ decks });
+                }, (error) => {
+                    console.error("Firebase error:", error);
+                    set({ error: error.message });
+                });
+
+                const cardsQuery = query(
+                    collection(db, 'cards'),
+                    where('userId', '==', user.uid),
+                    orderBy('createdAt', 'desc')
+                );
+                unsubscribeCards = onSnapshot(cardsQuery, (snapshot) => {
+                    const cards = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    set({ cards });
+                });
+            } else if (!user) {
+                // Clear data when logged out
+                set({ decks: [], cards: [] });
+            }
         });
-        if (isFirebaseConfigured()) {
-            // Firebase Realtime Listeners
-            const decksQuery = query(collection(db, 'decks'), orderBy('createdAt', 'desc'));
-            const unsubscribeDecks = onSnapshot(decksQuery, (snapshot) => {
-                const decks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                set({ decks });
-            }, (error) => {
-                console.error("Firebase error:", error);
-                set({ error: error.message });
-            });
 
-            const cardsQuery = query(collection(db, 'cards'), orderBy('createdAt', 'desc'));
-            const unsubscribeCards = onSnapshot(cardsQuery, (snapshot) => {
-                const cards = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                set({ cards });
-            });
-
-            return () => {
-                unsubscribeAuth();
-                unsubscribeDecks();
-                unsubscribeCards();
-            };
-        } else {
-            // Local Storage Fallback
-            const localDecks = JSON.parse(localStorage.getItem('memora_decks') || '[]');
-            const localCards = JSON.parse(localStorage.getItem('memora_cards') || '[]');
-            set({ decks: localDecks, cards: localCards, loadingAuth: false });
-            return () => { unsubscribeAuth(); };
-        }
+        return () => {
+            unsubscribeAuth();
+            unsubscribeDecks();
+            unsubscribeCards();
+        };
     },
 
     addDeck: async (name) => {
+        const user = get().user;
+        if (!user) {
+            throw new Error('Must be authenticated to create decks');
+        }
+
         const newDeck = {
             name,
+            userId: user.uid,
             createdAt: new Date().toISOString(),
             cardCount: 0
         };
@@ -120,8 +140,14 @@ export const useStore = create((set, get) => ({
     },
 
     addCard: async (deckId, front, back, tags = []) => {
+        const user = get().user;
+        if (!user) {
+            throw new Error('Must be authenticated to create cards');
+        }
+
         const newCard = {
             deckId,
+            userId: user.uid,
             front,
             back,
             tags,
