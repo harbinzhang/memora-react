@@ -40,6 +40,22 @@ service cloud.firestore {
         && request.resource.data.repetitions >= 0;
     }
 
+    // Helper function to validate review history data structure
+    function isValidReviewHistory() {
+      return request.resource.data.keys().hasAll(['cardId', 'grade', 'timestamp', 'responseTime', 'previousInterval', 'newInterval'])
+        && request.resource.data.cardId is string
+        && request.resource.data.grade is int
+        && request.resource.data.grade >= 0
+        && request.resource.data.grade <= 5
+        && request.resource.data.timestamp is string
+        && request.resource.data.responseTime is number
+        && request.resource.data.responseTime >= 0
+        && request.resource.data.previousInterval is number
+        && request.resource.data.previousInterval >= 0
+        && request.resource.data.newInterval is number
+        && request.resource.data.newInterval >= 0;
+    }
+
     // Decks collection - users can only access their own decks
     match /decks/{deckId} {
       // Allow read if authenticated and deck belongs to user
@@ -77,6 +93,20 @@ service cloud.firestore {
         && isValidCard();
 
       // Allow delete if authenticated and owns the card
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // Review history collection - users can only access their own review history
+    match /reviewHistory/{historyId} {
+      // Allow read if authenticated and review belongs to user
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+      // Allow create if authenticated and setting userId to current user
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid
+        && isValidReviewHistory();
+
+      // Allow delete if authenticated and owns the review history
       allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
 

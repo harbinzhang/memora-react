@@ -6,7 +6,7 @@ import { ArrowLeft, Plus, Trash2, Edit2, Save, X } from 'lucide-react';
 export default function DeckView() {
     const { deckId } = useParams();
     const navigate = useNavigate();
-    const { decks, cards, addCard, deleteCard, updateCard } = useStore();
+    const { decks, cards, addCard, deleteCard, updateCard, deleteDeck } = useStore();
 
     const deck = decks.find(d => d.id === deckId);
     const deckCards = cards.filter(c => c.deckId === deckId);
@@ -117,6 +117,21 @@ export default function DeckView() {
                         )}
                     </div>
                 ))}
+            </div>
+            <div className="mt-12 border-t border-glass-border pt-8">
+                <h3 className="text-danger mb-4">Danger Zone</h3>
+                <button
+                    className="btn btn-danger"
+                    onClick={() => {
+                        if (confirm('Are you sure you want to delete this deck? This action cannot be undone.')) {
+                            deleteDeck(deck.id);
+                            navigate('/');
+                        }
+                    }}
+                >
+                    <Trash2 size={18} />
+                    Delete Deck
+                </button>
             </div>
         </div>
     );

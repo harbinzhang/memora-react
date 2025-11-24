@@ -52,8 +52,8 @@ export const useStore = create((set, get) => ({
 
     // Initialize listeners or load from local storage
     initialize: () => {
-        let unsubscribeDecks = () => {};
-        let unsubscribeCards = () => {};
+        let unsubscribeDecks = () => { };
+        let unsubscribeCards = () => { };
 
         // Auth listener
         const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
@@ -139,6 +139,18 @@ export const useStore = create((set, get) => ({
         }
     },
 
+    updateDeck: async (id, updates) => {
+        if (isFirebaseConfigured()) {
+            await updateDoc(doc(db, 'decks', id), updates);
+        } else {
+            const updatedDecks = get().decks.map(d =>
+                d.id === id ? { ...d, ...updates } : d
+            );
+            set({ decks: updatedDecks });
+            localStorage.setItem('memora_decks', JSON.stringify(updatedDecks));
+        }
+    },
+
     addCard: async (deckId, front, back, tags = []) => {
         const user = get().user;
         if (!user) {
@@ -207,5 +219,113 @@ export const useStore = create((set, get) => ({
                 localStorage.setItem('memora_decks', JSON.stringify(updatedDecks));
             }
         }
+    },
+
+    // SM-2 Spaced Repetition Algorithm
+    // Calculate next review based on grade (0=Again, 3=Hard, 4=Good, 5=Easy)
+    calculateNextReview: (card, grade) => {
+        const MAX_INTERVAL = 365; // 1 year maximum
+        let { interval, easeFactor, repetitions } = card;
+
+        // If grade < 3 (Again button), reset the card
+        if (grade < 3) {
+            return {
+                interval: 0,
+                easeFactor: Math.max(1.3, easeFactor - 0.2), // Decrease EF but don't go below 1.3
+                repetitions: 0,
+                nextReview: new Date().toISOString() // Review again today
+            };
+        }
+
+        // Update ease factor based on grade
+        // EF' = EF + (0.1 - (5-grade) * (0.08 + (5-grade) * 0.02))
+        const newEaseFactor = Math.max(1.3, Math.min(2.5,
+            easeFactor + (0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02))
+        ));
+
+        // Calculate new interval
+        let newInterval;
+        if (repetitions === 0) {
+            newInterval = 1; // First successful review: 1 day
+        } else if (repetitions === 1) {
+            newInterval = 6; // Second successful review: 6 days
+        } else {
+            newInterval = Math.round(interval * newEaseFactor);
+        }
+
+        // Cap at maximum interval (365 days)
+        newInterval = Math.min(newInterval, MAX_INTERVAL);
+
+        // Calculate next review date
+        const nextReviewDate = new Date();
+        nextReviewDate.setDate(nextReviewDate.getDate() + newInterval);
+
+        return {
+            interval: newInterval,
+            easeFactor: newEaseFactor,
+            repetitions: repetitions + 1,
+            nextReview: nextReviewDate.toISOString()
+        };
+    },
+
+    // Submit a review for a card
+    submitReview: async (cardId, grade, responseTime) => {
+        const user = get().user;
+        if (!user) {
+            throw new Error('Must be authenticated to submit reviews');
+        }
+
+        const card = get().cards.find(c => c.id === cardId);
+        if (!card) {
+            throw new Error('Card not found');
+        }
+
+        // Calculate new review parameters using SM-2
+        const reviewResult = get().calculateNextReview(card, grade);
+
+        // Update the card with new review parameters
+        await get().updateCard(cardId, reviewResult);
+
+        // Save review history
+        const reviewHistory = {
+            cardId,
+            userId: user.uid,
+            grade,
+            timestamp: new Date().toISOString(),
+            responseTime,
+            previousInterval: card.interval,
+            newInterval: reviewResult.interval
+        };
+
+        if (isFirebaseConfigured()) {
+            await addDoc(collection(db, 'reviewHistory'), reviewHistory);
+        }
+
+        return reviewResult;
+    },
+
+    // Get cards that are due for review (with 20% early review flexibility)
+    getDueCards: (deckId) => {
+        const now = new Date();
+        const flexibilityWindow = 0.2; // 20% early review allowed
+
+        return get().cards.filter(card => {
+            if (card.deckId !== deckId) return false;
+
+            const dueDate = new Date(card.nextReview);
+
+            // Calculate flexible due date (20% earlier than scheduled)
+            const earlyDate = new Date(dueDate);
+            const flexibilityMs = card.interval * 24 * 60 * 60 * 1000 * flexibilityWindow;
+            earlyDate.setTime(earlyDate.getTime() - flexibilityMs);
+
+            // Card is due if current time is past the early review window
+            return now >= earlyDate;
+        });
+    },
+
+    // Get count of due cards for a specific deck
+    getDueCardCount: (deckId) => {
+        return get().getDueCards(deckId).length;
     }
 }));

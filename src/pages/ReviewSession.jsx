@@ -5,16 +5,16 @@ import { ArrowLeft, RotateCw, CheckCircle } from 'lucide-react';
 
 export default function ReviewSession() {
     const { deckId } = useParams();
-    const { decks, cards } = useStore();
+    const { decks, getDueCards, submitReview, updateDeck } = useStore();
 
     const deck = decks.find(d => d.id === deckId);
-    // Simple review logic: just show all cards in the deck for now
-    // In a real app, filter by due date
-    const reviewCards = cards.filter(c => c.deckId === deckId);
+    // Get cards that are due for review (with 20% flexibility window)
+    const reviewCards = getDueCards(deckId);
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
     const [isFinished, setIsFinished] = useState(false);
+    const [reviewStartTime, setReviewStartTime] = useState(null);
 
     useEffect(() => {
         if (reviewCards.length === 0) {
@@ -22,10 +22,32 @@ export default function ReviewSession() {
         }
     }, [reviewCards]);
 
+    // Track when user flips the card to measure response time
+    useEffect(() => {
+        if (isFlipped && !reviewStartTime) {
+            setReviewStartTime(Date.now());
+        }
+    }, [isFlipped, reviewStartTime]);
+
     const currentCard = reviewCards[currentIndex];
 
-    const handleNext = () => {
+    const handleFeedback = async (grade) => {
+        // Calculate response time in seconds
+        const responseTime = reviewStartTime
+            ? (Date.now() - reviewStartTime) / 1000
+            : 0;
+
+        // Submit the review with SM-2 calculation
+        await submitReview(currentCard.id, grade, responseTime);
+
+        // Update deck's lastReviewed timestamp
+        await updateDeck(deckId, { lastReviewed: new Date().toISOString() });
+
+        // Reset state for next card
         setIsFlipped(false);
+        setReviewStartTime(null);
+
+        // Move to next card or finish
         if (currentIndex < reviewCards.length - 1) {
             setCurrentIndex(prev => prev + 1);
         } else {
@@ -33,16 +55,30 @@ export default function ReviewSession() {
         }
     };
 
+    const handleAgain = () => handleFeedback(0);  // Grade 0
+    const handleHard = () => handleFeedback(3);   // Grade 3
+    const handleGood = () => handleFeedback(4);   // Grade 4
+    const handleEasy = () => handleFeedback(5);   // Grade 5
+
     if (!deck) return <div>Deck not found</div>;
 
-    if (isFinished) {
+    if (isFinished || reviewCards.length === 0) {
+        const noDueCards = reviewCards.length === 0 && currentIndex === 0;
+
         return (
             <div className="animate-fade-in text-center mt-16 max-w-md mx-auto">
                 <div className="flex justify-center mb-6">
                     <CheckCircle size={64} className="text-success" />
                 </div>
-                <h1 className="mb-4">Session Complete!</h1>
-                <p className="text-secondary mb-8">You have reviewed all cards in this deck.</p>
+                <h1 className="mb-4">
+                    {noDueCards ? 'No Cards Due!' : 'Session Complete!'}
+                </h1>
+                <p className="text-secondary mb-8">
+                    {noDueCards
+                        ? 'All cards in this deck are up to date. Come back later for review.'
+                        : 'You have reviewed all due cards in this deck. Great job!'
+                    }
+                </p>
                 <Link to="/" className="btn btn-primary">Back to Dashboard</Link>
             </div>
         );
@@ -90,22 +126,32 @@ export default function ReviewSession() {
             </div>
 
             {isFlipped && (
-                <div className="animate-fade-in grid grid-cols-3 gap-4 mt-8">
+                <div className="animate-fade-in grid grid-cols-4 gap-3 mt-8">
                     <button
-                        className="btn border-danger text-danger hover:bg-danger hover:text-white"
-                        onClick={handleNext}
+                        className="btn border-danger text-danger hover:bg-danger hover:text-white transition-all"
+                        onClick={handleAgain}
+                        title="Review again today"
                     >
                         Again
                     </button>
                     <button
-                        className="btn border-accent text-accent hover:bg-accent hover:text-white"
-                        onClick={handleNext}
+                        className="btn border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white transition-all"
+                        onClick={handleHard}
+                        title="Difficult, shorter interval"
+                    >
+                        Hard
+                    </button>
+                    <button
+                        className="btn border-accent text-accent hover:bg-accent hover:text-white transition-all"
+                        onClick={handleGood}
+                        title="Normal difficulty"
                     >
                         Good
                     </button>
                     <button
-                        className="btn border-success text-success hover:bg-success hover:text-white"
-                        onClick={handleNext}
+                        className="btn border-success text-success hover:bg-success hover:text-white transition-all"
+                        onClick={handleEasy}
+                        title="Easy, longer interval"
                     >
                         Easy
                     </button>
