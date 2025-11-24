@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { ArrowLeft, Plus, Trash2, Edit2, Save, X } from 'lucide-react';
+import Pagination from '../components/Pagination';
+
+const CARDS_PER_PAGE = 10;
 
 export default function DeckView() {
     const { deckId } = useParams();
@@ -12,11 +15,28 @@ export default function DeckView() {
     const deckCards = cards.filter(c => c.deckId === deckId);
 
     const [editingId, setEditingId] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
 
     // Form State
     const [front, setFront] = useState('');
     const [back, setBack] = useState('');
     const [tags, setTags] = useState('');
+
+    // Calculate pagination
+    const totalPages = Math.ceil(deckCards.length / CARDS_PER_PAGE);
+    const indexOfLastCard = currentPage * CARDS_PER_PAGE;
+    const indexOfFirstCard = indexOfLastCard - CARDS_PER_PAGE;
+    const currentCards = deckCards.slice(indexOfFirstCard, indexOfLastCard);
+
+    // Reset to page 1 when deck changes or cards are added/deleted
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [deckId, deckCards.length]);
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     if (!deck) {
         return (
@@ -78,7 +98,7 @@ export default function DeckView() {
 
             {/* Card List */}
             <div className="flex flex-col gap-4">
-                {deckCards.map(card => (
+                {currentCards.map(card => (
                     <div key={card.id} className="card p-6 mb-0">
                         {editingId === card.id ? (
                             <form onSubmit={handleUpdateCard}>
@@ -118,6 +138,18 @@ export default function DeckView() {
                     </div>
                 ))}
             </div>
+
+            {/* Pagination */}
+            {deckCards.length > 0 && (
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                    totalItems={deckCards.length}
+                    itemsPerPage={CARDS_PER_PAGE}
+                />
+            )}
+
             <div className="mt-12 border-t border-glass-border pt-8">
                 <h3 className="text-danger mb-4">Danger Zone</h3>
                 <button
