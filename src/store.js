@@ -164,7 +164,7 @@ export const useStore = create((set, get) => ({
             back,
             tags,
             createdAt: new Date().toISOString(),
-            nextReview: new Date().toISOString(), // Immediate review
+            nextReview: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(), // Immediate review (start of today)
             interval: 0, // 0 days
             easeFactor: 2.5,
             repetitions: 0
