@@ -157,7 +157,31 @@ export default function DeckView() {
                         ) : (
                             <div className="flex gap-4">
                                 <div className="flex-1">
-                                    <div className="font-medium mb-2">{card.front}</div>
+                                    <div className="flex justify-between items-start gap-4 mb-2">
+                                        <div className="font-medium flex-1">{card.front}</div>
+                                        <div className="text-xs text-secondary/50 text-right shrink-0 flex items-center gap-2">
+                                            <span>{card.lastReview ? new Date(card.lastReview).toLocaleDateString() : 'New'}</span>
+                                            {card.lastGrade !== undefined && (
+                                                <>
+                                                    <span>•</span>
+                                                    <span className={
+                                                        card.lastGrade === 5 ? 'text-success' :
+                                                            card.lastGrade === 4 ? 'text-accent' :
+                                                                card.lastGrade === 3 ? 'text-yellow-500' :
+                                                                    'text-danger'
+                                                    }>
+                                                        {card.lastGrade === 5 ? 'Easy' :
+                                                            card.lastGrade === 4 ? 'Good' :
+                                                                card.lastGrade === 3 ? 'Hard' : 'Again'}
+                                                    </span>
+                                                </>
+                                            )}
+                                            <span className="opacity-30">|</span>
+                                            <span>{card.interval}d</span>
+                                            <span>→</span>
+                                            <span>{new Date(card.nextReview).toLocaleDateString()}</span>
+                                        </div>
+                                    </div>
                                     <div className="text-secondary whitespace-pre-wrap">{card.back}</div>
                                     {card.tags && card.tags.length > 0 && (
                                         <div className="flex gap-2 mt-3">

@@ -221,7 +221,7 @@ export const useStore = create((set, get) => ({
         }
     },
 
-    // SM-2 Spaced Repetition Algorithm
+    // Custom Multiplier Spaced Repetition Algorithm
     // Calculate next review based on grade (0=Again, 3=Hard, 4=Good, 5=Easy)
     calculateNextReview: (card, grade) => {
         const MAX_INTERVAL = 365; // 1 year maximum
@@ -231,26 +231,25 @@ export const useStore = create((set, get) => ({
         if (grade < 3) {
             return {
                 interval: 0,
-                easeFactor: Math.max(1.3, easeFactor - 0.2), // Decrease EF but don't go below 1.3
+                easeFactor: easeFactor, // Keep EF same or reset if desired
                 repetitions: 0,
                 nextReview: new Date().toISOString() // Review again today
             };
         }
 
-        // Update ease factor based on grade
-        // EF' = EF + (0.1 - (5-grade) * (0.08 + (5-grade) * 0.02))
-        const newEaseFactor = Math.max(1.3, Math.min(2.5,
-            easeFactor + (0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02))
-        ));
-
-        // Calculate new interval
+        // Calculate new interval based on multipliers
         let newInterval;
-        if (repetitions === 0) {
-            newInterval = 1; // First successful review: 1 day
-        } else if (repetitions === 1) {
-            newInterval = 6; // Second successful review: 6 days
+
+        if (interval === 0) {
+            // First successful review starts at 1 day
+            newInterval = 1;
         } else {
-            newInterval = Math.round(interval * newEaseFactor);
+            // Apply multipliers based on grade
+            // Hard (3): x1.2
+            // Good (4): x2.0 (Doubling)
+            // Easy (5): x3.0 (Tripling)
+            const multiplier = grade === 3 ? 1.2 : (grade === 4 ? 2.0 : 3.0);
+            newInterval = Math.round(interval * multiplier);
         }
 
         // Cap at maximum interval (365 days)
@@ -262,7 +261,7 @@ export const useStore = create((set, get) => ({
 
         return {
             interval: newInterval,
-            easeFactor: newEaseFactor,
+            easeFactor: easeFactor, // Unused in this simple logic but kept for schema compatibility
             repetitions: repetitions + 1,
             nextReview: nextReviewDate.toISOString()
         };
@@ -284,7 +283,11 @@ export const useStore = create((set, get) => ({
         const reviewResult = get().calculateNextReview(card, grade);
 
         // Update the card with new review parameters
-        await get().updateCard(cardId, reviewResult);
+        await get().updateCard(cardId, {
+            ...reviewResult,
+            lastGrade: grade,
+            lastReview: new Date().toISOString()
+        });
 
         // Save review history
         const reviewHistory = {
