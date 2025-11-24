@@ -8,19 +8,22 @@ export default function ReviewSession() {
     const { decks, getDueCards, submitReview, updateDeck } = useStore();
 
     const deck = decks.find(d => d.id === deckId);
-    // Get cards that are due for review (with 20% flexibility window)
-    const reviewCards = getDueCards(deckId);
 
+    // Capture review cards once at component mount to prevent recalculation during reviews
+    const [reviewCards, setReviewCards] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
     const [isFinished, setIsFinished] = useState(false);
     const [reviewStartTime, setReviewStartTime] = useState(null);
 
+    // Initialize review cards once when component mounts or deckId changes
     useEffect(() => {
-        if (reviewCards.length === 0) {
+        const cards = getDueCards(deckId);
+        setReviewCards(cards);
+        if (cards.length === 0) {
             setIsFinished(true);
         }
-    }, [reviewCards]);
+    }, [deckId, getDueCards]);
 
     // Track when user flips the card to measure response time
     useEffect(() => {
