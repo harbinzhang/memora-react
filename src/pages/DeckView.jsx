@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { ArrowLeft, Plus, Trash2, Edit2, Save, X } from 'lucide-react';
 import Pagination from '../components/Pagination';
+import ConfirmModal from '../components/ConfirmModal';
 
 const CARDS_PER_PAGE = 10;
 
@@ -21,6 +22,15 @@ export default function DeckView() {
     const [front, setFront] = useState('');
     const [back, setBack] = useState('');
     const [tags, setTags] = useState('');
+
+    // Modal State
+    const [modalConfig, setModalConfig] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => { },
+        isDangerous: false
+    });
 
     // Calculate pagination
     const totalPages = Math.ceil(deckCards.length / CARDS_PER_PAGE);
@@ -69,6 +79,29 @@ export default function DeckView() {
         setTags('');
     };
 
+    const handleDeleteDeck = () => {
+        setModalConfig({
+            isOpen: true,
+            title: 'Delete Deck',
+            message: `Are you sure you want to delete "${deck.name}"? This action cannot be undone and will delete all cards in this deck.`,
+            isDangerous: true,
+            onConfirm: () => {
+                deleteDeck(deck.id);
+                navigate('/');
+            }
+        });
+    };
+
+    const handleDeleteCard = (cardId) => {
+        setModalConfig({
+            isOpen: true,
+            title: 'Delete Card',
+            message: 'Are you sure you want to delete this card? This action cannot be undone.',
+            isDangerous: true,
+            onConfirm: () => deleteCard(cardId)
+        });
+    };
+
     return (
         <div className="animate-fade-in">
             <header className="flex items-center mb-8 gap-4">
@@ -82,12 +115,7 @@ export default function DeckView() {
                 <div className="flex gap-2">
                     <button
                         className="btn btn-danger"
-                        onClick={() => {
-                            if (confirm('Are you sure you want to delete this deck? This action cannot be undone.')) {
-                                deleteDeck(deck.id);
-                                navigate('/');
-                            }
-                        }}
+                        onClick={handleDeleteDeck}
                         title="Delete Deck"
                     >
                         <Trash2 size={20} />
@@ -143,7 +171,7 @@ export default function DeckView() {
                                     <button className="btn p-2" onClick={() => startEdit(card)} title="Edit">
                                         <Edit2 size={16} />
                                     </button>
-                                    <button className="btn btn-danger p-2" onClick={() => deleteCard(card.id)} title="Delete">
+                                    <button className="btn btn-danger p-2" onClick={() => handleDeleteCard(card.id)} title="Delete">
                                         <Trash2 size={16} />
                                     </button>
                                 </div>
@@ -164,7 +192,14 @@ export default function DeckView() {
                 />
             )}
 
-
+            <ConfirmModal
+                isOpen={modalConfig.isOpen}
+                onClose={() => setModalConfig(prev => ({ ...prev, isOpen: false }))}
+                title={modalConfig.title}
+                message={modalConfig.message}
+                onConfirm={modalConfig.onConfirm}
+                isDangerous={modalConfig.isDangerous}
+            />
         </div>
     );
 }
