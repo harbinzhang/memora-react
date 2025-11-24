@@ -1,0 +1,3 @@
+#separator:tab
+#html:true
+"<div>python:<br><br>PIPER_HEAD = ""/google/src/files/head/depot/google3""</div>"	"<div>If this variable will only be used in this module, please prepend with an underscore, see: http://go/pystyle#naming-conventions</div><div><br></div><div>_SPANNER_DEFAULT_ALLOC = ""research_flex:us""</div>"
