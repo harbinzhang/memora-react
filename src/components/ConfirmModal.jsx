@@ -30,42 +30,40 @@ export default function ConfirmModal({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirm-modal-title"
+        >
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+                className="absolute inset-0 modal-backdrop transition-opacity"
                 onClick={onClose}
             />
-
             {/* Modal Content */}
-            <div className="relative w-full max-w-md bg-card border border-glass-border rounded-2xl shadow-2xl overflow-hidden animate-scale-in">
+            <div className="modal-content-panel w-full max-w-md animate-scale-in">
                 <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
                             {isDangerous && (
-                                <div className="p-2 bg-danger/10 rounded-full text-danger">
-                                    <AlertTriangle size={24} />
+                                <div className="danger-icon-wrapper p-2 rounded-full">
+                                    <AlertTriangle size={22} />
                                 </div>
                             )}
-                            <h3 className="text-xl font-semibold m-0">{title}</h3>
+                            <h3 id="confirm-modal-title" className="text-xl font-semibold m-0">{title}</h3>
                         </div>
                         <button
                             onClick={onClose}
-                            className="text-secondary hover:text-primary transition-colors p-1 rounded-full hover:bg-white/5"
+                            aria-label="Close dialog"
+                            className="text-secondary hover:text-primary transition-colors p-1 rounded-full hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                         >
                             <X size={20} />
                         </button>
                     </div>
-
-                    <p className="text-secondary mb-8 leading-relaxed">
-                        {message}
-                    </p>
-
+                    <p className="text-secondary mb-8 leading-relaxed">{message}</p>
                     <div className="flex justify-end gap-3">
-                        <button
-                            onClick={onClose}
-                            className="btn btn-secondary"
-                        >
+                        <button onClick={onClose} className="btn btn-secondary" autoFocus>
                             {cancelText}
                         </button>
                         <button
