@@ -21,10 +21,16 @@ export default function Dashboard() {
         <div className="animate-fade-in">
             <header className="flex justify-between items-center mb-4">
                 <h1>Your Decks</h1>
-                <button className="btn btn-primary" onClick={() => setIsCreating(true)}>
-                    <Plus size={18} />
-                    Create Deck
-                </button>
+                <div className="flex gap-3">
+                    <Link to="/add" className="btn btn-secondary">
+                        <Plus size={18} />
+                        Add Card
+                    </Link>
+                    <button className="btn btn-primary" onClick={() => setIsCreating(true)}>
+                        <Plus size={18} />
+                        Create Deck
+                    </button>
+                </div>
             </header>
 
             {isCreating && (

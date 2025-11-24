@@ -11,7 +11,6 @@ export default function DeckView() {
     const deck = decks.find(d => d.id === deckId);
     const deckCards = cards.filter(c => c.deckId === deckId);
 
-    const [isAdding, setIsAdding] = useState(false);
     const [editingId, setEditingId] = useState(null);
 
     // Form State
@@ -27,17 +26,6 @@ export default function DeckView() {
             </div>
         );
     }
-
-    const handleAddCard = async (e) => {
-        e.preventDefault();
-        if (!front.trim() || !back.trim()) return;
-
-        await addCard(deckId, front, back, tags.split(',').map(t => t.trim()).filter(Boolean));
-        setFront('');
-        setBack('');
-        setTags('');
-        setIsAdding(false);
-    };
 
     const startEdit = (card) => {
         setEditingId(card.id);
@@ -76,55 +64,16 @@ export default function DeckView() {
                 </Link>
             </header>
 
-            {/* Add Card Form */}
-            <div className={`card mb-8 ${isAdding ? 'border-accent' : ''}`}>
-                {!isAdding ? (
-                    <button
-                        className="btn w-full flex items-center justify-center gap-2"
-                        onClick={() => { setIsAdding(true); setEditingId(null); setFront(''); setBack(''); setTags(''); }}
-                    >
-                        <Plus size={18} /> Add New Card
-                    </button>
-                ) : (
-                    <form onSubmit={handleAddCard}>
-                        <h3 className="mt-0">New Card</h3>
-                        <div className="flex flex-col gap-4">
-                            <div>
-                                <label className="label">Front</label>
-                                <textarea
-                                    className="textarea"
-                                    rows="2"
-                                    value={front}
-                                    onChange={e => setFront(e.target.value)}
-                                    autoFocus
-                                />
-                            </div>
-                            <div>
-                                <label className="label">Back</label>
-                                <textarea
-                                    className="textarea"
-                                    rows="3"
-                                    value={back}
-                                    onChange={e => setBack(e.target.value)}
-                                />
-                            </div>
-                            <div>
-                                <label className="label">Tags (comma separated)</label>
-                                <input
-                                    type="text"
-                                    className="input"
-                                    value={tags}
-                                    onChange={e => setTags(e.target.value)}
-                                    placeholder="vocab, noun, unit1"
-                                />
-                            </div>
-                            <div className="flex justify-end gap-4">
-                                <button type="button" className="btn btn-secondary" onClick={() => setIsAdding(false)}>Cancel</button>
-                                <button type="submit" className="btn btn-primary">Add Card</button>
-                            </div>
-                        </div>
-                    </form>
-                )}
+            {/* Add Card Button */}
+            <div className="mb-8">
+                <Link
+                    to="/add"
+                    state={{ deckId: deck.id }}
+                    className="btn w-full flex items-center justify-center gap-2 py-4 border-2 border-dashed border-glass-border hover:border-accent hover:text-accent transition-all"
+                >
+                    <Plus size={20} />
+                    Add New Card to {deck.name}
+                </Link>
             </div>
 
             {/* Card List */}

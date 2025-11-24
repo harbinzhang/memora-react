@@ -95,6 +95,13 @@ body {
   flex-direction: column;
 }
 
+@media (max-width: 768px) {
+  .app-container {
+    max-width: none;
+    padding: 0 0.75rem;
+  }
+}
+
 /* Typography */
 h1,
 h2,
