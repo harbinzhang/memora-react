@@ -35,6 +35,7 @@ export default function ConfirmModal({
             role="dialog"
             aria-modal="true"
             aria-labelledby="confirm-modal-title"
+            aria-describedby="confirm-modal-message"
         >
             {/* Backdrop */}
             <div
@@ -42,10 +43,11 @@ export default function ConfirmModal({
                 onClick={onClose}
             />
             {/* Modal Content */}
-            <div className="modal-content-panel w-full max-w-md animate-scale-in">
+            <div className="modal-content-panel w-full max-w-md animate-scale-in" role="document">
                 <div className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
+                    {/* Header */}
+                    <div className="modal-header">
+                        <div className="modal-title-group">
                             {isDangerous && (
                                 <div className="danger-icon-wrapper p-2 rounded-full">
                                     <AlertTriangle size={22} />
@@ -56,13 +58,17 @@ export default function ConfirmModal({
                         <button
                             onClick={onClose}
                             aria-label="Close dialog"
-                            className="text-secondary hover:text-primary transition-colors p-1 rounded-full hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                            className="close-btn text-secondary hover:text-primary transition-colors p-1 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                         >
                             <X size={20} />
                         </button>
                     </div>
-                    <p className="text-secondary mb-8 leading-relaxed">{message}</p>
-                    <div className="flex justify-end gap-3">
+                    {/* Body */}
+                    <div className="modal-body">
+                        <p id="confirm-modal-message" className="text-secondary leading-relaxed m-0">{message}</p>
+                    </div>
+                    {/* Footer / Actions */}
+                    <div className="modal-footer">
                         <button onClick={onClose} className="btn btn-secondary" autoFocus>
                             {cancelText}
                         </button>

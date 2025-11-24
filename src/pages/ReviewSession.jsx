@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useStore } from '../store';
-import { ArrowLeft, RotateCw, CheckCircle } from 'lucide-react';
+import { ArrowLeft, RotateCw, CheckCircle, BookOpen } from 'lucide-react';
+import ConfirmModal from '../components/ConfirmModal';
+
+const formatInterval = (days) => {
+    if (days === 0) return '< 1m';
+    if (days >= 365) return `${(days / 365).toFixed(1)}y`;
+    if (days >= 30) return `${(days / 30).toFixed(1)}mo`;
+    return `${days}d`;
+};
 
 export default function ReviewSession() {
     const { deckId } = useParams();
-    const { decks, getDueCards, submitReview, updateDeck } = useStore();
+    const { decks, getDueCards, getOverLearnCards, submitReview, updateDeck, calculateNextReview } = useStore();
 
     const deck = decks.find(d => d.id === deckId);
 
@@ -15,6 +23,8 @@ export default function ReviewSession() {
     const [isFlipped, setIsFlipped] = useState(false);
     const [isFinished, setIsFinished] = useState(false);
     const [reviewStartTime, setReviewStartTime] = useState(null);
+    const [isOverLearning, setIsOverLearning] = useState(false);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     // Initialize review cards once when component mounts or deckId changes
     useEffect(() => {
@@ -63,6 +73,16 @@ export default function ReviewSession() {
     const handleGood = () => handleFeedback(4);   // Grade 4
     const handleEasy = () => handleFeedback(5);   // Grade 5
 
+    const handleOverLearn = () => {
+        const overLearnCards = getOverLearnCards(deckId);
+        if (overLearnCards.length > 0) {
+            setReviewCards(overLearnCards);
+            setIsFinished(false);
+            setCurrentIndex(0);
+            setIsOverLearning(true);
+        }
+    };
+
     if (!deck) return <div>Deck not found</div>;
 
     if (isFinished || reviewCards.length === 0) {
@@ -82,7 +102,27 @@ export default function ReviewSession() {
                         : 'You have reviewed all due cards in this deck. Great job!'
                     }
                 </p>
-                <Link to="/" className="btn btn-primary">Back to Dashboard</Link>
+                <div className="flex flex-col gap-3">
+                    <Link to="/" className="btn btn-primary">Back to Dashboard</Link>
+                    {noDueCards && (
+                        <button
+                            className="btn btn-secondary flex items-center justify-center gap-2"
+                            onClick={() => setShowConfirmModal(true)}
+                        >
+                            <BookOpen size={18} />
+                            Study Anyway (Over-learn)
+                        </button>
+                    )}
+                </div>
+
+                <ConfirmModal
+                    isOpen={showConfirmModal}
+                    onClose={() => setShowConfirmModal(false)}
+                    title="Over-learn Mode"
+                    message="You are about to study cards that are not yet due. Reviewing them now will reset their learning interval based on the current time. Do you want to proceed?"
+                    confirmText="Start Over-learning"
+                    onConfirm={handleOverLearn}
+                />
             </div>
         );
     }
@@ -131,32 +171,44 @@ export default function ReviewSession() {
             {isFlipped && (
                 <div className="animate-fade-in grid grid-cols-4 gap-3 mt-8">
                     <button
-                        className="btn border-danger text-danger hover:bg-danger hover:text-white transition-all"
+                        className="btn border-danger text-danger hover:bg-danger hover:text-white transition-all flex flex-col items-center justify-center py-3"
                         onClick={handleAgain}
                         title="Review again today"
                     >
-                        Again
+                        <span className="font-medium">Again</span>
+                        <span className="text-xs opacity-80 font-normal mt-1">
+                            {formatInterval(calculateNextReview(currentCard, 0).interval)}
+                        </span>
                     </button>
                     <button
-                        className="btn border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white transition-all"
+                        className="btn border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white transition-all flex flex-col items-center justify-center py-3"
                         onClick={handleHard}
                         title="Difficult, shorter interval"
                     >
-                        Hard
+                        <span className="font-medium">Hard</span>
+                        <span className="text-xs opacity-80 font-normal mt-1">
+                            {formatInterval(calculateNextReview(currentCard, 3).interval)}
+                        </span>
                     </button>
                     <button
-                        className="btn border-accent text-accent hover:bg-accent hover:text-white transition-all"
+                        className="btn border-accent text-accent hover:bg-accent hover:text-white transition-all flex flex-col items-center justify-center py-3"
                         onClick={handleGood}
                         title="Normal difficulty"
                     >
-                        Good
+                        <span className="font-medium">Good</span>
+                        <span className="text-xs opacity-80 font-normal mt-1">
+                            {formatInterval(calculateNextReview(currentCard, 4).interval)}
+                        </span>
                     </button>
                     <button
-                        className="btn border-success text-success hover:bg-success hover:text-white transition-all"
+                        className="btn border-success text-success hover:bg-success hover:text-white transition-all flex flex-col items-center justify-center py-3"
                         onClick={handleEasy}
                         title="Easy, longer interval"
                     >
-                        Easy
+                        <span className="font-medium">Easy</span>
+                        <span className="text-xs opacity-80 font-normal mt-1">
+                            {formatInterval(calculateNextReview(currentCard, 5).interval)}
+                        </span>
                     </button>
                 </div>
             )}

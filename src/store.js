@@ -327,5 +327,23 @@ export const useStore = create((set, get) => ({
     // Get count of due cards for a specific deck
     getDueCardCount: (deckId) => {
         return get().getDueCards(deckId).length;
+    },
+
+    // Get cards that are NOT due for review, sorted by next review date
+    getOverLearnCards: (deckId) => {
+        const now = new Date();
+        const flexibilityWindow = 0.2;
+
+        return get().cards.filter(card => {
+            if (card.deckId !== deckId) return false;
+
+            const dueDate = new Date(card.nextReview);
+            const earlyDate = new Date(dueDate);
+            const flexibilityMs = card.interval * 24 * 60 * 60 * 1000 * flexibilityWindow;
+            earlyDate.setTime(earlyDate.getTime() - flexibilityMs);
+
+            // Card is NOT due if current time is before the early review window
+            return now < earlyDate;
+        }).sort((a, b) => new Date(a.nextReview) - new Date(b.nextReview));
     }
 }));
