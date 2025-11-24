@@ -79,9 +79,23 @@ export default function DeckView() {
                     <h1 className="mb-1">{deck.name}</h1>
                     <p className="m-0">{deckCards.length} cards</p>
                 </div>
-                <Link to={`/review/${deckId}`} className="btn btn-primary">
-                    Study Now
-                </Link>
+                <div className="flex gap-2">
+                    <button
+                        className="btn btn-danger"
+                        onClick={() => {
+                            if (confirm('Are you sure you want to delete this deck? This action cannot be undone.')) {
+                                deleteDeck(deck.id);
+                                navigate('/');
+                            }
+                        }}
+                        title="Delete Deck"
+                    >
+                        <Trash2 size={20} />
+                    </button>
+                    <Link to={`/review/${deckId}`} className="btn btn-primary">
+                        Study Now
+                    </Link>
+                </div>
             </header>
 
             {/* Add Card Button */}
@@ -150,21 +164,7 @@ export default function DeckView() {
                 />
             )}
 
-            <div className="mt-12 border-t border-glass-border pt-8">
-                <h3 className="text-danger mb-4">Danger Zone</h3>
-                <button
-                    className="btn btn-danger"
-                    onClick={() => {
-                        if (confirm('Are you sure you want to delete this deck? This action cannot be undone.')) {
-                            deleteDeck(deck.id);
-                            navigate('/');
-                        }
-                    }}
-                >
-                    <Trash2 size={18} />
-                    Delete Deck
-                </button>
-            </div>
+
         </div>
     );
 }
