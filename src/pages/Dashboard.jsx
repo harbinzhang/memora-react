@@ -99,7 +99,7 @@ export default function Dashboard() {
         <div className="animate-fade-in">
             <header className="flex justify-between items-center mb-4">
                 <h1>Your Decks</h1>
-                <div className="flex gap-3">
+                <div className="flex items-center gap-4">
                     <input
                         type="file"
                         ref={fileInputRef}
@@ -116,11 +116,11 @@ export default function Dashboard() {
                     </button>
                     <Link to="/add" className="btn btn-secondary">
                         <Plus size={18} />
-                        Add Card
+                        Card
                     </Link>
-                    <button className="btn btn-primary" onClick={() => setIsCreating(true)}>
+                    <button className="btn btn-secondary" onClick={() => setIsCreating(true)}>
                         <Plus size={18} />
-                        Create Deck
+                        Deck
                     </button>
                 </div>
             </header>
