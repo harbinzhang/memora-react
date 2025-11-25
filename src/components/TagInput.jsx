@@ -9,6 +9,7 @@ export default function TagInput({ tags = [], onChange, suggestions = [], placeh
   const inputRef = useRef(null);
   const containerRef = useRef(null);
 
+  // Derived state: filter suggestions based on input
   useEffect(() => {
     if (inputValue.trim()) {
       const filtered = suggestions.filter(
@@ -16,10 +17,14 @@ export default function TagInput({ tags = [], onChange, suggestions = [], placeh
           suggestion.toLowerCase().includes(inputValue.toLowerCase()) &&
           !tags.includes(suggestion)
       );
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFilteredSuggestions(filtered);
+       
       setShowSuggestions(filtered.length > 0);
     } else {
+       
       setShowSuggestions(false);
+       
       setFilteredSuggestions([]);
     }
   }, [inputValue, suggestions, tags]);

@@ -172,8 +172,6 @@ export const useStore = create((set, get) => ({
 
         if (isFirebaseConfigured()) {
             await addDoc(collection(db, 'cards'), newCard);
-            // Update deck card count
-            const deckRef = doc(db, 'decks', deckId);
             // Note: In real app, use transaction or cloud function for count
         } else {
             const cardWithId = { ...newCard, id: uuidv4() };

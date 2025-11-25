@@ -23,14 +23,15 @@ export default function ReviewSession() {
     const [isFlipped, setIsFlipped] = useState(false);
     const [isFinished, setIsFinished] = useState(false);
     const [reviewStartTime, setReviewStartTime] = useState(null);
-    const [isOverLearning, setIsOverLearning] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     // Initialize review cards once when component mounts or deckId changes
     useEffect(() => {
         const cards = getDueCards(deckId);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setReviewCards(cards);
         if (cards.length === 0) {
+             
             setIsFinished(true);
         }
     }, [deckId, getDueCards]);
@@ -38,6 +39,7 @@ export default function ReviewSession() {
     // Track when user flips the card to measure response time
     useEffect(() => {
         if (isFlipped && !reviewStartTime) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setReviewStartTime(Date.now());
         }
     }, [isFlipped, reviewStartTime]);
@@ -79,7 +81,6 @@ export default function ReviewSession() {
             setReviewCards(overLearnCards);
             setIsFinished(false);
             setCurrentIndex(0);
-            setIsOverLearning(true);
         }
     };
 

@@ -10,7 +10,7 @@ const CARDS_PER_PAGE = 10;
 export default function DeckView() {
     const { deckId } = useParams();
     const navigate = useNavigate();
-    const { decks, cards, addCard, deleteCard, updateCard, deleteDeck } = useStore();
+    const { decks, cards, deleteCard, updateCard, deleteDeck } = useStore();
 
     const deck = decks.find(d => d.id === deckId);
     const deckCards = cards.filter(c => c.deckId === deckId);
@@ -40,6 +40,7 @@ export default function DeckView() {
 
     // Reset to page 1 when deck changes or cards are added/deleted
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setCurrentPage(1);
     }, [deckId, deckCards.length]);
 

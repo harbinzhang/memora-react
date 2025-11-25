@@ -31,6 +31,7 @@ export default function AddCard() {
     // Update deckId if decks load after component mount
     useEffect(() => {
         if (!deckId && decks.length > 0) {
+             
             setDeckId(decks[0].id);
         }
     }, [decks, deckId]);
@@ -77,6 +78,7 @@ export default function AddCard() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [front, back, tagList, deckId, navigate]);
 
     if (decks.length === 0) {
