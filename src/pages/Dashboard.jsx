@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom';
 import { useStore } from '../store';
 import { Plus, BookOpen, Clock, Upload } from 'lucide-react';
 import { parseImportFile } from '../utils/importParser';
+import { useToast } from '../contexts/ToastContext';
 
 export default function Dashboard() {
     const { decks, addDeck, addCard, getDueCardCount } = useStore();
     const [newDeckName, setNewDeckName] = useState('');
     const [isCreating, setIsCreating] = useState(false);
     const fileInputRef = useRef(null);
+    const toast = useToast();
 
     const handleFileImport = async (e) => {
         const file = e.target.files[0];
@@ -21,7 +23,7 @@ export default function Dashboard() {
                 const cards = parseImportFile(content);
 
                 if (cards.length === 0) {
-                    alert('No valid cards found in file');
+                    toast.error('No valid cards found in file');
                     return;
                 }
 
@@ -65,17 +67,17 @@ export default function Dashboard() {
                     for (const card of cards) {
                         await addCard(newDeck.id, card.front, card.back);
                     }
-                    alert(`Successfully imported ${cards.length} cards into "${deckName}"`);
+                    toast.success(`Successfully imported ${cards.length} cards into "${deckName}"`);
                 } else {
                     // Fallback if we can't find it immediately (e.g. firebase latency)
                     // This is a risk. I should probably update store.js to return ID.
                     // But let's try this first.
-                    alert('Deck created but could not add cards immediately. Please try again.');
+                    toast.warning('Deck created but could not add cards immediately. Please try again.');
                 }
 
             } catch (error) {
                 console.error('Import error:', error);
-                alert('Error importing file');
+                toast.error('Error importing file');
             }
 
             // Reset input

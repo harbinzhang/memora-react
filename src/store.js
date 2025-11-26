@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
+import srsConfig from './config/srsConfig';
 import {
     collection,
     addDoc,
@@ -165,8 +166,8 @@ export const useStore = create((set, get) => ({
             tags,
             createdAt: new Date().toISOString(),
             nextReview: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(), // Immediate review (start of today)
-            interval: 0, // 0 days
-            easeFactor: 2.5,
+            interval: srsConfig.INITIAL_INTERVAL,
+            easeFactor: srsConfig.DEFAULT_EASE_FACTOR,
             repetitions: 0
         };
 
@@ -219,47 +220,34 @@ export const useStore = create((set, get) => ({
         }
     },
 
-    // Custom Multiplier Spaced Repetition Algorithm
+    // Custom Multiplier Spaced Repetition Algorithm (Config-driven)
     // Calculate next review based on grade (0=Again, 3=Hard, 4=Good, 5=Easy)
     calculateNextReview: (card, grade) => {
-        const MAX_INTERVAL = 365; // 1 year maximum
         let { interval, easeFactor, repetitions } = card;
 
-        // If grade < 3 (Again button), reset the card
+        // Calculate new interval using config-driven algorithm
+        const newInterval = srsConfig.calculateInterval(interval, grade);
+
+        // Calculate next review date
+        // For sub-day intervals (fractional days), we need to add milliseconds
+        const nextReviewDate = new Date();
+        const millisecondsToAdd = newInterval * 24 * 60 * 60 * 1000;
+        nextReviewDate.setTime(nextReviewDate.getTime() + millisecondsToAdd);
+
+        // If grade < 3 (Again button), reset repetitions and set immediate review
         if (grade < 3) {
             return {
-                interval: 0,
-                easeFactor: easeFactor, // Keep EF same or reset if desired
+                interval: newInterval,
+                easeFactor: easeFactor,
                 repetitions: 0,
-                nextReview: new Date().toISOString() // Review again today
+                nextReview: nextReviewDate.toISOString()
             };
         }
 
-        // Calculate new interval based on multipliers
-        let newInterval;
-
-        if (interval === 0) {
-            // First successful review starts at 1 day
-            newInterval = 1;
-        } else {
-            // Apply multipliers based on grade
-            // Hard (3): x1.2
-            // Good (4): x2.0 (Doubling)
-            // Easy (5): x3.0 (Tripling)
-            const multiplier = grade === 3 ? 1.2 : (grade === 4 ? 2.0 : 3.0);
-            newInterval = Math.round(interval * multiplier);
-        }
-
-        // Cap at maximum interval (365 days)
-        newInterval = Math.min(newInterval, MAX_INTERVAL);
-
-        // Calculate next review date
-        const nextReviewDate = new Date();
-        nextReviewDate.setDate(nextReviewDate.getDate() + newInterval);
-
+        // For successful reviews, increment repetitions
         return {
             interval: newInterval,
-            easeFactor: easeFactor, // Unused in this simple logic but kept for schema compatibility
+            easeFactor: easeFactor, // Kept for schema compatibility
             repetitions: repetitions + 1,
             nextReview: nextReviewDate.toISOString()
         };
@@ -305,19 +293,18 @@ export const useStore = create((set, get) => ({
         return reviewResult;
     },
 
-    // Get cards that are due for review (with 20% early review flexibility)
+    // Get cards that are due for review (with configurable early review flexibility)
     getDueCards: (deckId) => {
         const now = new Date();
-        const flexibilityWindow = 0.2; // 20% early review allowed
 
         return get().cards.filter(card => {
             if (card.deckId !== deckId) return false;
 
             const dueDate = new Date(card.nextReview);
 
-            // Calculate flexible due date (20% earlier than scheduled)
+            // Calculate flexible due date using config
             const earlyDate = new Date(dueDate);
-            const flexibilityMs = card.interval * 24 * 60 * 60 * 1000 * flexibilityWindow;
+            const flexibilityMs = card.interval * 24 * 60 * 60 * 1000 * srsConfig.FLEXIBILITY_WINDOW;
             earlyDate.setTime(earlyDate.getTime() - flexibilityMs);
 
             // Card is due if current time is past the early review window
@@ -333,14 +320,13 @@ export const useStore = create((set, get) => ({
     // Get cards that are NOT due for review, sorted by next review date
     getOverLearnCards: (deckId) => {
         const now = new Date();
-        const flexibilityWindow = 0.2;
 
         return get().cards.filter(card => {
             if (card.deckId !== deckId) return false;
 
             const dueDate = new Date(card.nextReview);
             const earlyDate = new Date(dueDate);
-            const flexibilityMs = card.interval * 24 * 60 * 60 * 1000 * flexibilityWindow;
+            const flexibilityMs = card.interval * 24 * 60 * 60 * 1000 * srsConfig.FLEXIBILITY_WINDOW;
             earlyDate.setTime(earlyDate.getTime() - flexibilityMs);
 
             // Card is NOT due if current time is before the early review window
