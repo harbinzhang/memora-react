@@ -4,6 +4,7 @@ import { useStore } from '../store';
 import { ArrowLeft, Plus, Trash2, Edit2, Save, X } from 'lucide-react';
 import Pagination from '../components/Pagination';
 import ConfirmModal from '../components/ConfirmModal';
+import { formatInterval } from '../utils/formatInterval';
 
 const CARDS_PER_PAGE = 10;
 
@@ -178,7 +179,7 @@ export default function DeckView() {
                                                 </>
                                             )}
                                             <span className="opacity-30">|</span>
-                                            <span>{card.interval}d</span>
+                                            <span>{formatInterval(card.interval)}</span>
                                             <span>→</span>
                                             <span>{new Date(card.nextReview).toLocaleDateString()}</span>
                                         </div>
