@@ -44,6 +44,55 @@ export default function ReviewSession() {
         }
     }, [isFlipped, reviewStartTime]);
 
+    // Keyboard shortcuts for review
+    useEffect(() => {
+        const handleKeyPress = (event) => {
+            // Ignore if session is finished
+            if (isFinished) return;
+
+            // Ignore if user is typing in input or textarea
+            const targetTag = event.target.tagName.toLowerCase();
+            if (targetTag === 'input' || targetTag === 'textarea') return;
+
+            const key = event.code;
+
+            // Spacebar to show answer
+            if (key === 'Space' && !isFlipped) {
+                event.preventDefault(); // Prevent page scroll
+                setIsFlipped(true);
+                return;
+            }
+
+            // Number keys for review actions (only when answer is visible)
+            if (!isFlipped) return;
+
+            switch(key) {
+                case 'Digit1':
+                    event.preventDefault();
+                    handleAgain();
+                    break;
+                case 'Digit2':
+                    event.preventDefault();
+                    handleHard();
+                    break;
+                case 'Digit3':
+                    event.preventDefault();
+                    handleGood();
+                    break;
+                case 'Digit4':
+                    event.preventDefault();
+                    handleEasy();
+                    break;
+                default:
+                    break;
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyPress);
+        return () => window.removeEventListener('keydown', handleKeyPress);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isFlipped, isFinished]);
+
     const currentCard = reviewCards[currentIndex];
 
     const handleFeedback = async (grade) => {
@@ -163,7 +212,7 @@ export default function ReviewSession() {
                         </div>
                     ) : (
                         <p className="text-sm text-secondary mt-8 opacity-50 group-hover:opacity-100 transition-opacity">
-                            Click to show answer
+                            Click or press Space to show answer
                         </p>
                     )}
                 </div>
