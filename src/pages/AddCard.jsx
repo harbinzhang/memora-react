@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store';
 import { Save, X, ArrowLeft, Check, Command } from 'lucide-react';
 import TagInput from '../components/TagInput';
+import FlashcardPreview from '../components/FlashcardPreview';
+import { handleRichTextPaste } from '../utils/pasteHandler';
 
 export default function AddCard() {
     const navigate = useNavigate();
@@ -157,6 +159,7 @@ export default function AddCard() {
                                     className="card-textarea"
                                     value={front}
                                     onChange={(e) => setFront(e.target.value)}
+                                    onPaste={(e) => handleRichTextPaste(e, setFront)}
                                     required
                                     autoFocus
                                     maxLength={500}
@@ -179,6 +182,7 @@ export default function AddCard() {
                                     className="card-textarea"
                                     value={back}
                                     onChange={(e) => setBack(e.target.value)}
+                                    onPaste={(e) => handleRichTextPaste(e, setBack)}
                                     required
                                     maxLength={500}
                                     placeholder=""
@@ -234,6 +238,16 @@ export default function AddCard() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Live Preview */}
+                    {(front || back) && (
+                        <div className="form-row">
+                            <label className="label">Preview</label>
+                            <div className="input-wrapper">
+                                <FlashcardPreview front={front} back={back} />
+                            </div>
+                        </div>
+                    )}
                 </div>
             </form>
 
