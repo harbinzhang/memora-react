@@ -597,6 +597,10 @@ a:hover {
   white-space: pre-wrap;
 }
 
+.whitespace-nowrap {
+  white-space: nowrap;
+}
+
 .text-secondary {
   color: var(--text-secondary);
 }
