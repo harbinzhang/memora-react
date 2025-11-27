@@ -1,7 +1,7 @@
 import { useEffect, lazy, Suspense, useState, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { useStore } from './store';
-import { Sun, Moon, LogOut, User, ChevronDown, Settings } from 'lucide-react';
+import { Sun, Moon, LogOut, User, ChevronDown, Settings, HelpCircle } from 'lucide-react';
 import { ToastProvider } from './contexts/ToastContext';
 
 // Lazy load route components for code splitting
@@ -10,6 +10,7 @@ const DeckView = lazy(() => import('./pages/DeckView'));
 const ReviewSession = lazy(() => import('./pages/ReviewSession'));
 const Login = lazy(() => import('./pages/Login'));
 const AddCard = lazy(() => import('./pages/AddCard'));
+const Help = lazy(() => import('./pages/Help'));
 
 // Protected Route wrapper
 function ProtectedRoute({ children }) {
@@ -94,6 +95,15 @@ function App() {
                           <span className="font-medium">Settings</span>
                         </button>
 
+                        <Link
+                          to="/help"
+                          className="w-full flex items-center gap-3 px-3 py-3.5 text-base rounded-lg transition-colors text-left group text-secondary hover:text-primary menu-item"
+                          onClick={() => setDropdownOpen(false)}
+                        >
+                          <HelpCircle size={18} className="group-hover:text-primary transition-colors" />
+                          <span className="font-medium">Help</span>
+                        </Link>
+
                         <div className="h-px bg-glass-border my-1.5 mx-2" />
 
                         <button
@@ -125,6 +135,7 @@ function App() {
               <Route path="/deck/:deckId" element={<ProtectedRoute><DeckView /></ProtectedRoute>} />
               <Route path="/review/:deckId" element={<ProtectedRoute><ReviewSession /></ProtectedRoute>} />
               <Route path="/add" element={<ProtectedRoute><AddCard /></ProtectedRoute>} />
+              <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
             </Routes>
           </Suspense>
         </div>
