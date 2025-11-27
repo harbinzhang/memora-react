@@ -5,6 +5,7 @@ import { ArrowLeft, Plus, Trash2, Edit2, Save, X } from 'lucide-react';
 import Pagination from '../components/Pagination';
 import ConfirmModal from '../components/ConfirmModal';
 import { formatInterval } from '../utils/formatInterval';
+import HTMLContent from '../components/HTMLContent';
 
 const CARDS_PER_PAGE = 10;
 
@@ -160,7 +161,7 @@ export default function DeckView() {
                             <div className="flex gap-4">
                                 <div className="flex-1">
                                     <div className="flex justify-between items-start gap-4 mb-2">
-                                        <div className="font-medium flex-1">{card.front}</div>
+                                        <HTMLContent content={card.front} className="font-medium flex-1" />
                                         <div className="text-xs text-secondary/50 text-right shrink-0 flex items-center gap-2">
                                             <span>{card.lastReview ? new Date(card.lastReview).toLocaleDateString() : 'New'}</span>
                                             {card.lastGrade !== undefined && (
@@ -184,7 +185,7 @@ export default function DeckView() {
                                             <span>{new Date(card.nextReview).toLocaleDateString()}</span>
                                         </div>
                                     </div>
-                                    <div className="text-secondary whitespace-pre-wrap">{card.back}</div>
+                                    <HTMLContent content={card.back} className="text-secondary" />
                                     {card.tags && card.tags.length > 0 && (
                                         <div className="flex gap-2 mt-3">
                                             {card.tags.map(tag => (

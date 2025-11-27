@@ -79,8 +79,10 @@ function App() {
 
                   {dropdownOpen && (
                     <div className="absolute right-0 mt-3 w-64 bg-card border border-glass-border rounded-lg shadow-2xl overflow-hidden z-50 backdrop-blur-xl animate-scale-in origin-top-right account-menu-panel">
-                      <div className="px-4 py-4 border-b border-glass-border account-menu-header" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-                        <p className="text-sm font-medium text-primary truncate">{user.email}</p>
+                      <div className="px-4 pt-6 pb-4 border-b border-glass-border account-menu-header" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                        <p className="text-base font-semibold text-primary truncate capitalize">
+                          {user.displayName || user.email?.split('@')[0]}
+                        </p>
                       </div>
 
                       <div className="p-2">

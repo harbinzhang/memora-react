@@ -4,6 +4,7 @@ import { useStore } from '../store';
 import { ArrowLeft, RotateCw, CheckCircle, BookOpen } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import { formatInterval } from '../utils/formatInterval';
+import HTMLContent from '../components/HTMLContent';
 
 export default function ReviewSession() {
     const { deckId } = useParams();
@@ -198,11 +199,11 @@ export default function ReviewSession() {
                 onClick={() => !isFlipped && setIsFlipped(true)}
             >
                 <div className="text-center w-full p-8">
-                    <h3 className="text-2xl mb-4 font-medium">{currentCard.front}</h3>
+                    <HTMLContent content={currentCard.front} className="text-2xl mb-4 font-medium" />
 
                     {isFlipped ? (
                         <div className="animate-fade-in border-t border-glass-border pt-6 mt-6">
-                            <p className="text-xl text-secondary">{currentCard.back}</p>
+                            <HTMLContent content={currentCard.back} className="text-xl text-secondary" />
                         </div>
                     ) : (
                         <p className="text-sm text-secondary mt-8 opacity-50 group-hover:opacity-100 transition-opacity">

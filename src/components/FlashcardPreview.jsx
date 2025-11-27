@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import HTMLContent from './HTMLContent';
 
 export default function FlashcardPreview({ front = '', back = '' }) {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -23,9 +24,11 @@ export default function FlashcardPreview({ front = '', back = '' }) {
         <div className="flashcard-face flashcard-front">
           <div className="flashcard-content">
             <div className="flashcard-label">Question</div>
-            <p className="flashcard-text">
-              {front || 'Type your question...'}
-            </p>
+            {front ? (
+              <HTMLContent content={front} className="flashcard-text" />
+            ) : (
+              <p className="flashcard-text">Type your question...</p>
+            )}
             {hasContent && (
               <div className="flashcard-hint">
                 <span className="pulse-dot"></span>
@@ -39,9 +42,11 @@ export default function FlashcardPreview({ front = '', back = '' }) {
         <div className="flashcard-face flashcard-back">
           <div className="flashcard-content">
             <div className="flashcard-label">Answer</div>
-            <p className="flashcard-text">
-              {back || 'Type your answer...'}
-            </p>
+            {back ? (
+              <HTMLContent content={back} className="flashcard-text" />
+            ) : (
+              <p className="flashcard-text">Type your answer...</p>
+            )}
             {hasContent && (
               <div className="flashcard-hint">
                 <span className="pulse-dot"></span>

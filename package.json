@@ -15,6 +15,7 @@
     "deploy:preview": "npm run build && firebase hosting:channel:deploy preview"
   },
   "dependencies": {
+    "dompurify": "^3.3.0",
     "firebase": "^12.6.0",
     "lucide-react": "^0.554.0",
     "react": "^19.2.0",
