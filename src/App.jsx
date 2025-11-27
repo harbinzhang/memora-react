@@ -1,7 +1,7 @@
 import { useEffect, lazy, Suspense, useState, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { useStore } from './store';
-import { Sun, Moon, LogOut, User, ChevronDown } from 'lucide-react';
+import { Sun, Moon, LogOut, User, ChevronDown, Settings } from 'lucide-react';
 import { ToastProvider } from './contexts/ToastContext';
 
 // Lazy load route components for code splitting
@@ -59,7 +59,7 @@ function App() {
             <Link to="/" className="logo">Memora</Link>
             <div className="flex items-center gap-4">
               <button
-                className="btn p-2 rounded-full border-glass-border hover:bg-card-hover"
+                className="btn p-3 rounded-full border-glass-border hover:bg-card-hover"
                 onClick={toggleTheme}
                 title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
               >
@@ -68,27 +68,45 @@ function App() {
               {user && (
                 <div className="relative" ref={dropdownRef}>
                   <button
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-glass-border hover:border-primary/30 bg-card/50 hover:bg-card transition-all"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-glass-border hover:border-primary/30 bg-card/50 hover:bg-card transition-all group"
                     onClick={() => setDropdownOpen(!dropdownOpen)}
                   >
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
-                      <User size={14} className="text-primary" />
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center border border-primary/10 group-hover:border-primary/20 transition-colors">
+                      <User size={16} className="text-primary" />
                     </div>
-                    <span className="text-sm font-medium">{user.email.split('@')[0].split('.')[0]}</span>
-                    <ChevronDown size={14} className={`text-secondary transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown size={14} className={`text-secondary transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
+
                   {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-44 bg-card border border-glass-border rounded-lg shadow-xl overflow-hidden z-50 backdrop-blur-xl">
-                      <button
-                        className="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-card-hover transition-colors text-left group"
-                        onClick={() => {
-                          logout();
-                          setDropdownOpen(false);
-                        }}
-                      >
-                        <LogOut size={16} className="text-secondary group-hover:text-primary transition-colors" />
-                        <span className="font-medium">Sign out</span>
-                      </button>
+                    <div className="absolute right-0 mt-3 w-64 bg-card border border-glass-border rounded-lg shadow-2xl overflow-hidden z-50 backdrop-blur-xl animate-scale-in origin-top-right account-menu-panel">
+                      <div className="px-4 pt-6 pb-4 border-b border-glass-border account-menu-header" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                        <p className="text-base font-semibold text-primary truncate capitalize text-center">
+                          {user.displayName || user.email?.split('@')[0]}
+                        </p>
+                      </div>
+
+                      <div className="p-2">
+                        <button
+                          className="w-full flex items-center gap-3 px-3 py-3.5 text-base rounded-lg transition-colors text-left group text-secondary hover:text-primary menu-item"
+                          onClick={() => setDropdownOpen(false)}
+                        >
+                          <Settings size={18} className="group-hover:text-primary transition-colors" />
+                          <span className="font-medium">Settings</span>
+                        </button>
+
+                        <div className="h-px bg-glass-border my-1.5 mx-2" />
+
+                        <button
+                          className="w-full flex items-center gap-3 px-3 py-3.5 text-base rounded-lg transition-colors text-left group text-secondary hover:text-danger menu-item-danger"
+                          onClick={() => {
+                            logout();
+                            setDropdownOpen(false);
+                          }}
+                        >
+                          <LogOut size={18} className="group-hover:text-danger transition-colors" />
+                          <span className="font-medium whitespace-nowrap">Sign out</span>
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>

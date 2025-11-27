@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Firebase local artifacts and hosting cache
+.firebase/
+hosting.ZGlzdA.cache

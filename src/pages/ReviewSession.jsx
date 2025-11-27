@@ -3,29 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { useStore } from '../store';
 import { ArrowLeft, RotateCw, CheckCircle, BookOpen } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
-
-const formatInterval = (days) => {
-    if (days === 0) return '< 1m';
-
-    // Handle sub-day intervals (minutes and hours)
-    if (days < 1) {
-        const totalMinutes = Math.round(days * 24 * 60);
-
-        // Less than 1 hour: show minutes
-        if (totalMinutes < 60) {
-            return `${totalMinutes}m`;
-        }
-
-        // 1+ hours but less than 1 day: show hours
-        const hours = Math.round(totalMinutes / 60);
-        return `${hours}h`;
-    }
-
-    // Handle day-level intervals
-    if (days >= 365) return `${(days / 365).toFixed(1)}y`;
-    if (days >= 30) return `${(days / 30).toFixed(1)}mo`;
-    return `${Math.round(days)}d`;
-};
+import { formatInterval } from '../utils/formatInterval';
+import HTMLContent from '../components/HTMLContent';
 
 export default function ReviewSession() {
     const { deckId } = useParams();
@@ -220,11 +199,11 @@ export default function ReviewSession() {
                 onClick={() => !isFlipped && setIsFlipped(true)}
             >
                 <div className="text-center w-full p-8">
-                    <h3 className="text-2xl mb-4 font-medium">{currentCard.front}</h3>
+                    <HTMLContent content={currentCard.front} className="text-2xl mb-4 font-medium" />
 
                     {isFlipped ? (
                         <div className="animate-fade-in border-t border-glass-border pt-6 mt-6">
-                            <p className="text-xl text-secondary">{currentCard.back}</p>
+                            <HTMLContent content={currentCard.back} className="text-xl text-secondary" />
                         </div>
                     ) : (
                         <p className="text-sm text-secondary mt-8 opacity-50 group-hover:opacity-100 transition-opacity">
