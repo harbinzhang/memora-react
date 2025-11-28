@@ -1,0 +1,18 @@
+# Sample CSV import file for Memora
+# Lines starting with # are comments and will be ignored
+
+What is the capital of France?,Paris
+What is 2 + 2?,4
+"What is the largest ocean on Earth?","The Pacific Ocean"
+"Name a programming language that uses commas, semicolons, and brackets","JavaScript, Python, or Java"
+What does HTML stand for?,HyperText Markup Language
+"Who wrote ""To be or not to be""?",William Shakespeare
+What is the speed of light?,"299,792,458 meters per second"
+Translate 'Hello' to Spanish,Hola
+What is the chemical symbol for gold?,Au
+"In which year did World War II end?",1945
+What is the smallest prime number?,2
+"Name the four seasons","Spring, Summer, Autumn, Winter"
+What is the boiling point of water?,100°C or 212°F
+Who painted the Mona Lisa?,Leonardo da Vinci
+What does CPU stand for?,Central Processing Unit

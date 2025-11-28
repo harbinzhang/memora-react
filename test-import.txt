@@ -1,0 +1,18 @@
+# Sample TAB-separated import file for Memora
+# Lines starting with # are comments and will be ignored
+
+What is the capital of Japan?	Tokyo
+What is 5 × 6?	30
+"What is the smallest continent?"	"Australia"
+"Which programming language is known for 'tabs vs spaces' debates?"	"Python"
+What does CSS stand for?	Cascading Style Sheets
+"Who said ""I think, therefore I am""?"	René Descartes
+What is the freezing point of water?	"0°C or 32°F"
+Translate 'Goodbye' to French	Au revoir
+What is the chemical symbol for water?	H₂O
+"In which year did the first moon landing occur?"	1969
+What is the largest mammal?	Blue whale
+"Name the three primary colors"	"Red, Blue, Yellow"
+What is the square root of 64?	8
+Who developed the theory of relativity?	Albert Einstein
+What does RAM stand for?	Random Access Memory

@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { db, auth } from './firebase';
+import { isDeckNameDuplicate } from './utils/deckHelpers';
 
 // Check if Firebase is configured
 const isFirebaseConfigured = () => {
@@ -101,10 +102,18 @@ export const useStore = create((set, get) => ({
         };
     },
 
-    addDeck: async (name) => {
+    addDeck: async (name, options = {}) => {
         const user = get().user;
         if (!user) {
             throw new Error('Must be authenticated to create decks');
+        }
+
+        // Check for duplicates unless explicitly skipped
+        if (!options.skipDuplicateCheck) {
+            const decks = get().decks;
+            if (isDeckNameDuplicate(name, decks)) {
+                throw new Error(`A deck named "${name}" already exists`);
+            }
         }
 
         const newDeck = {
@@ -114,14 +123,20 @@ export const useStore = create((set, get) => ({
             cardCount: 0
         };
 
+        let deckId;
+
         if (isFirebaseConfigured()) {
-            await addDoc(collection(db, 'decks'), newDeck);
+            const docRef = await addDoc(collection(db, 'decks'), newDeck);
+            deckId = docRef.id;
         } else {
-            const deckWithId = { ...newDeck, id: uuidv4() };
+            deckId = uuidv4();
+            const deckWithId = { ...newDeck, id: deckId };
             const updatedDecks = [deckWithId, ...get().decks];
             set({ decks: updatedDecks });
             localStorage.setItem('memora_decks', JSON.stringify(updatedDecks));
         }
+
+        return deckId;
     },
 
     deleteDeck: async (id) => {
