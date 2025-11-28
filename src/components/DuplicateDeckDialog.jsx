@@ -67,13 +67,13 @@ const DuplicateDeckDialog = ({
       />
 
       {/* Modal Content */}
-      <div className="modal-content-panel w-full max-w-lg animate-scale-in" role="document">
+      <div className="modal-content-panel w-full max-w-md animate-scale-in" role="document">
         <div className="p-6">
           {/* Header */}
           <div className="modal-header">
             <div className="modal-title-group">
-              <div className="danger-icon-wrapper p-2 rounded-full" style={{ backgroundColor: 'hsl(217, 91%, 60%, 0.1)' }}>
-                <AlertTriangle size={22} style={{ color: 'var(--accent)' }} />
+              <div className="danger-icon-wrapper p-2 rounded-full bg-[hsl(217,91%,60%,0.1)]">
+                <AlertTriangle size={22} className="text-[var(--accent)]" />
               </div>
               <h3 id="duplicate-dialog-title" className="text-xl font-semibold m-0">
                 Duplicate Deck Name
@@ -91,22 +91,16 @@ const DuplicateDeckDialog = ({
           {/* Body */}
           <div className="modal-body">
             <p className="text-secondary leading-relaxed m-0 mb-4">
-              A deck named <strong style={{ color: 'var(--accent)' }}>{importFileName}</strong> already exists.
+              A deck named <strong className="text-[var(--accent)]">{importFileName}</strong> already exists.
             </p>
 
             {/* Info Card */}
-            <div style={{
-              backgroundColor: 'var(--bg-secondary)',
-              border: '1px solid var(--glass-border)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '1rem',
-              marginBottom: '1.5rem'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+            <div className="bg-[var(--bg-secondary)] border border-[var(--glass-border)] rounded-[var(--radius-lg)] p-4 mb-6 space-y-2">
+              <div className="flex justify-between items-center">
                 <span className="text-secondary">Existing deck:</span>
                 <span className="text-primary font-medium">{existingDeck.cardCount} cards</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div className="flex justify-between items-center">
                 <span className="text-secondary">Import file:</span>
                 <span className="text-primary font-medium">{importCardCount} cards</span>
               </div>
@@ -115,24 +109,16 @@ const DuplicateDeckDialog = ({
             <p className="text-secondary text-sm mb-4">What would you like to do?</p>
 
             {/* Action Options */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div className="flex flex-col gap-3">
               {/* Merge Option */}
               <button
                 onClick={onMerge}
-                className="btn btn-primary"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  padding: '0.875rem 1rem',
-                  justifyContent: 'flex-start',
-                  textAlign: 'left'
-                }}
+                className="btn btn-primary flex items-center gap-3 py-3.5 px-4 justify-start text-left"
               >
                 <GitMerge size={20} />
-                <div>
-                  <div className="font-semibold" style={{ marginBottom: '0.125rem' }}>Merge Cards</div>
-                  <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>
+                <div className="flex-1">
+                  <div className="font-semibold mb-0.5">Merge Cards</div>
+                  <div className="text-sm opacity-90">
                     Add {importCardCount} cards to existing deck
                   </div>
                 </div>
@@ -142,70 +128,49 @@ const DuplicateDeckDialog = ({
               {!showRenameInput ? (
                 <button
                   onClick={() => setShowRenameInput(true)}
-                  className="btn btn-secondary"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.875rem 1rem',
-                    justifyContent: 'flex-start',
-                    textAlign: 'left'
-                  }}
+                  className="btn btn-secondary flex items-center gap-3 py-3.5 px-4 justify-start text-left"
                 >
                   <Edit3 size={20} />
-                  <div>
+                  <div className="flex-1">
                     <div className="font-semibold">Create New Deck</div>
-                    <div className="text-secondary" style={{ fontSize: '0.875rem' }}>
+                    <div className="text-secondary text-sm">
                       Import as a new deck with a different name
                     </div>
                   </div>
                 </button>
               ) : (
-                <div style={{
-                  padding: '1rem',
-                  backgroundColor: 'var(--bg-secondary)',
-                  border: '1px solid var(--glass-border)',
-                  borderRadius: 'var(--radius-lg)'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                    <Edit3 size={18} style={{ color: 'var(--accent)' }} />
+                <div className="p-4 bg-[var(--bg-secondary)] border border-[var(--glass-border)] rounded-[var(--radius-lg)] space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Edit3 size={18} className="text-[var(--accent)]" />
                     <div className="font-semibold">New Deck Name</div>
                   </div>
                   <input
                     type="text"
                     value={newName}
                     onChange={handleNameChange}
-                    className="input"
+                    className="input mb-2"
                     placeholder="Enter new deck name"
                     autoFocus
-                    style={{ marginBottom: '0.5rem' }}
                   />
                   {error && (
-                    <p style={{
-                      color: 'var(--danger)',
-                      fontSize: '0.875rem',
-                      marginBottom: '0.75rem',
-                      margin: '0 0 0.75rem 0'
-                    }}>
+                    <p className="text-[var(--danger)] text-sm m-0">
                       {error}
                     </p>
                   )}
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div className="flex gap-2">
                     <button
                       onClick={() => {
                         setShowRenameInput(false);
                         setNewName(suggestedName);
                         setError('');
                       }}
-                      className="btn btn-secondary"
-                      style={{ flex: 1 }}
+                      className="btn btn-secondary flex-1"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleRename}
-                      className="btn btn-primary"
-                      style={{ flex: 1 }}
+                      className="btn btn-primary flex-1"
                     >
                       Create
                     </button>
@@ -216,7 +181,7 @@ const DuplicateDeckDialog = ({
           </div>
 
           {/* Footer */}
-          <div className="modal-footer" style={{ marginTop: '1.5rem' }}>
+          <div className="modal-footer mt-6">
             <button onClick={onCancel} className="btn btn-danger">
               Cancel Import
             </button>
