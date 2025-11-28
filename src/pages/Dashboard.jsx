@@ -79,47 +79,48 @@ export default function Dashboard() {
         }
     };
 
-    const handleMergeCards = async () => {
+    const handleMergeCards = () => {
         if (!duplicateDialog) return;
 
         const { existingDeck, cards, importFileName } = duplicateDialog;
 
-        try {
-            // Add cards to existing deck
-            for (const card of cards) {
-                await addCard(existingDeck.id, card.front, card.back);
-            }
+        // Close dialog immediately
+        setDuplicateDialog(null);
 
-            toast.success(`Added ${cards.length} cards to existing deck "${importFileName}"`);
-            setDuplicateDialog(null);
-
-            // Reset file input
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-            }
-        } catch (error) {
-            console.error('Merge error:', error);
-            toast.error('Error merging cards');
+        // Reset file input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
         }
+
+        // Merge cards in background
+        (async () => {
+            try {
+                for (const card of cards) {
+                    await addCard(existingDeck.id, card.front, card.back);
+                }
+                toast.success(`Added ${cards.length} cards to existing deck "${importFileName}"`);
+            } catch (error) {
+                console.error('Merge error:', error);
+                toast.error('Error merging cards');
+            }
+        })();
     };
 
-    const handleRenameAndImport = async (newName) => {
+    const handleRenameAndImport = (newName) => {
         if (!duplicateDialog) return;
 
         const { cards } = duplicateDialog;
 
-        try {
-            await importCards(newName, cards);
-            setDuplicateDialog(null);
+        // Close dialog immediately
+        setDuplicateDialog(null);
 
-            // Reset file input
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-            }
-        } catch (error) {
-            console.error('Rename and import error:', error);
-            toast.error('Error importing with new name');
+        // Reset file input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
         }
+
+        // Import in background (same as normal import)
+        importCards(newName, cards);
     };
 
     const handleCancelImport = () => {
