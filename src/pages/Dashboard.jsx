@@ -4,11 +4,15 @@ import { useStore } from '../store';
 import { Plus, BookOpen, Clock, Upload } from 'lucide-react';
 import { parseImportFile } from '../utils/importParser';
 import { useToast } from '../contexts/ToastContext';
+import DuplicateDeckDialog from '../components/DuplicateDeckDialog';
+import { findDeckByName } from '../utils/deckHelpers';
 
 export default function Dashboard() {
     const { decks, addDeck, addCard, getDueCardCount } = useStore();
     const [newDeckName, setNewDeckName] = useState('');
     const [isCreating, setIsCreating] = useState(false);
+    const [deckCreationError, setDeckCreationError] = useState('');
+    const [duplicateDialog, setDuplicateDialog] = useState(null);
     const fileInputRef = useRef(null);
     const toast = useToast();
 
@@ -27,53 +31,22 @@ export default function Dashboard() {
                     return;
                 }
 
-                // Create a new deck with the filename
                 const deckName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
-                await addDeck(deckName);
+                const existingDeck = findDeckByName(deckName, decks);
 
-                // Get the newly created deck (it will be the first one in the list usually, but let's find it by name to be safe, or just wait for update)
-                // Since addDeck is async and updates store, we can try to find it. 
-                // However, addDeck doesn't return the ID in the current store implementation if using Firebase (it returns void).
-                // If local, it updates state.
-                // Let's assume the deck is added. We need the ID.
-                // The current store.addDeck implementation doesn't return the ID.
-                // I should probably update store.addDeck to return the ID, but for now I can find it by name.
-                // A better approach might be to update the store to return the ID. 
-                // Let's check store.js again.
-                // It seems addDeck returns void.
-
-                // Wait a bit for store to update or fetch? 
-                // Actually, let's just modify this logic slightly. 
-                // I'll assume I can find the deck by name for now, or I should update the store.
-                // Updating the store is cleaner. But let's stick to Dashboard changes first.
-                // I'll fetch the decks again or just look for it.
-
-                // Wait for the state to update?
-                // Let's just alert for now that it might be tricky without ID.
-                // Actually, I can just search for the deck with the name I just created.
-                // It's not perfect but it works for now.
-
-                // Let's do a quick hack: find the deck with the name.
-                // Since we just added it, it should be there.
-
-                // We need to wait for the store to update.
-                // But addDeck is async.
-
-                // Let's try to find it after await.
-                const updatedDecks = useStore.getState().decks;
-                const newDeck = updatedDecks.find(d => d.name === deckName);
-
-                if (newDeck) {
-                    for (const card of cards) {
-                        await addCard(newDeck.id, card.front, card.back);
-                    }
-                    toast.success(`Successfully imported ${cards.length} cards into "${deckName}"`);
-                } else {
-                    // Fallback if we can't find it immediately (e.g. firebase latency)
-                    // This is a risk. I should probably update store.js to return ID.
-                    // But let's try this first.
-                    toast.warning('Deck created but could not add cards immediately. Please try again.');
+                // If duplicate found, show dialog
+                if (existingDeck) {
+                    setDuplicateDialog({
+                        existingDeck,
+                        importFileName: deckName,
+                        importCardCount: cards.length,
+                        cards
+                    });
+                    return;
                 }
+
+                // No duplicate, proceed with import
+                await importCards(deckName, cards);
 
             } catch (error) {
                 console.error('Import error:', error);
@@ -88,13 +61,94 @@ export default function Dashboard() {
         reader.readAsText(file);
     };
 
+    const importCards = async (deckName, cards) => {
+        try {
+            // Create deck and get the ID back (now that store.addDeck returns ID)
+            const deckId = await addDeck(deckName, { skipDuplicateCheck: true });
+
+            // Add cards to the deck
+            for (const card of cards) {
+                await addCard(deckId, card.front, card.back);
+            }
+
+            toast.success(`Successfully imported ${cards.length} cards into "${deckName}"`);
+        } catch (error) {
+            console.error('Import cards error:', error);
+            toast.error('Error importing cards');
+            throw error;
+        }
+    };
+
+    const handleMergeCards = async () => {
+        if (!duplicateDialog) return;
+
+        const { existingDeck, cards, importFileName } = duplicateDialog;
+
+        try {
+            // Add cards to existing deck
+            for (const card of cards) {
+                await addCard(existingDeck.id, card.front, card.back);
+            }
+
+            toast.success(`Added ${cards.length} cards to existing deck "${importFileName}"`);
+            setDuplicateDialog(null);
+
+            // Reset file input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        } catch (error) {
+            console.error('Merge error:', error);
+            toast.error('Error merging cards');
+        }
+    };
+
+    const handleRenameAndImport = async (newName) => {
+        if (!duplicateDialog) return;
+
+        const { cards } = duplicateDialog;
+
+        try {
+            await importCards(newName, cards);
+            setDuplicateDialog(null);
+
+            // Reset file input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        } catch (error) {
+            console.error('Rename and import error:', error);
+            toast.error('Error importing with new name');
+        }
+    };
+
+    const handleCancelImport = () => {
+        setDuplicateDialog(null);
+
+        // Reset file input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
     const handleCreateDeck = async (e) => {
         e.preventDefault();
         if (!newDeckName.trim()) return;
 
-        await addDeck(newDeckName);
-        setNewDeckName('');
-        setIsCreating(false);
+        try {
+            await addDeck(newDeckName);
+            setNewDeckName('');
+            setIsCreating(false);
+            setDeckCreationError('');
+            toast.success('Deck created successfully');
+        } catch (error) {
+            setDeckCreationError(error.message);
+        }
+    };
+
+    const handleDeckNameChange = (e) => {
+        setNewDeckName(e.target.value);
+        setDeckCreationError(''); // Clear error when user types
     };
 
     return (
@@ -137,12 +191,19 @@ export default function Dashboard() {
                                 className="input"
                                 placeholder="Deck Name (e.g., Japanese Vocabulary)"
                                 value={newDeckName}
-                                onChange={(e) => setNewDeckName(e.target.value)}
+                                onChange={handleDeckNameChange}
                                 autoFocus
                             />
+                            {deckCreationError && (
+                                <p className="text-red-400 text-sm mt-2">{deckCreationError}</p>
+                            )}
                         </div>
                         <div className="flex justify-end gap-4">
-                            <button type="button" className="btn btn-secondary" onClick={() => setIsCreating(false)}>Cancel</button>
+                            <button type="button" className="btn btn-secondary" onClick={() => {
+                                setIsCreating(false);
+                                setDeckCreationError('');
+                                setNewDeckName('');
+                            }}>Cancel</button>
                             <button type="submit" className="btn btn-primary">Create</button>
                         </div>
                     </form>
@@ -200,6 +261,19 @@ export default function Dashboard() {
                     </div>
                 )}
             </div>
+
+            {/* Duplicate Deck Dialog */}
+            {duplicateDialog && (
+                <DuplicateDeckDialog
+                    existingDeck={duplicateDialog.existingDeck}
+                    importFileName={duplicateDialog.importFileName}
+                    importCardCount={duplicateDialog.importCardCount}
+                    allDecks={decks}
+                    onMerge={handleMergeCards}
+                    onRename={handleRenameAndImport}
+                    onCancel={handleCancelImport}
+                />
+            )}
         </div>
     );
 }
